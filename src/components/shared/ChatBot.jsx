@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, MessageCircle, ChevronDown } from "lucide-react";
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 
 // ─── Colour tokens (matches LandingPage) ──────────────────────
 const C = {
@@ -188,33 +188,28 @@ export default function ChatBot() {
     setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
     try {
-      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-      if (!apiKey || apiKey === "your_anthropic_api_key_here") {
-        throw new Error("Please add your VITE_ANTHROPIC_API_KEY to .env.local");
-      }
+      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+      if (!apiKey) throw new Error("Please add your VITE_GROQ_API_KEY to .env.local");
 
-      const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+      const client = new Groq({ apiKey, dangerouslyAllowBrowser: true });
 
-      // Build messages array for the API (only user/assistant turns, no system)
-      const apiMessages = newHistory.map(m => ({
-        role: m.role,
-        content: m.content,
-      }));
+      const apiMessages = [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...newHistory.map(m => ({ role: m.role, content: m.content })),
+      ];
 
-      // Cancel any previous stream
-      if (abortRef.current) abortRef.current.abort();
-
-      const stream = await client.messages.stream({
-        model: "claude-haiku-4-5",
+      const stream = await client.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
         max_tokens: 512,
-        system: SYSTEM_PROMPT,
         messages: apiMessages,
+        stream: true,
       });
 
       let accumulated = "";
-      for await (const event of stream) {
-        if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-          accumulated += event.delta.text;
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta?.content || "";
+        if (delta) {
+          accumulated += delta;
           setMessages(prev => {
             const updated = [...prev];
             updated[updated.length - 1] = { role: "assistant", content: accumulated };
@@ -325,24 +320,28 @@ export default function ChatBot() {
                       setIsStreaming(true);
                       setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
-                      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-                      if (!apiKey || apiKey === "your_anthropic_api_key_here") {
-                        setError("Please add your VITE_ANTHROPIC_API_KEY to .env.local");
+                      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+                      if (!apiKey) {
+                        setError("Please add your VITE_GROQ_API_KEY to .env.local");
                         setMessages(prev => prev.slice(0, -1));
                         setIsStreaming(false);
                         return;
                       }
-                      const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-                      client.messages.stream({
-                        model: "claude-haiku-4-5",
+                      const client = new Groq({ apiKey, dangerouslyAllowBrowser: true });
+                      client.chat.completions.create({
+                        model: "llama-3.3-70b-versatile",
                         max_tokens: 512,
-                        system: SYSTEM_PROMPT,
-                        messages: newHistory.map(m => ({ role: m.role, content: m.content })),
+                        messages: [
+                          { role: "system", content: SYSTEM_PROMPT },
+                          ...newHistory.map(m => ({ role: m.role, content: m.content })),
+                        ],
+                        stream: true,
                       }).then(async stream => {
                         let accumulated = "";
-                        for await (const event of stream) {
-                          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-                            accumulated += event.delta.text;
+                        for await (const chunk of stream) {
+                          const delta = chunk.choices[0]?.delta?.content || "";
+                          if (delta) {
+                            accumulated += delta;
                             setMessages(prev => {
                               const updated = [...prev];
                               updated[updated.length - 1] = { role: "assistant", content: accumulated };
