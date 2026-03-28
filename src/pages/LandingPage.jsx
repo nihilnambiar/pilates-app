@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 
 import { ArrowRight, Check, Star, ChevronDown, Menu, X, MapPin, Clock, Users } from "lucide-react";
 import ChatBot from "../components/shared/ChatBot";
@@ -306,151 +306,160 @@ const galleryItems = [
 ];
 
 // ─── Gallery Section ──────────────────────────────────────────
-function GallerySection({ galleryItems, C }) {
-  const [activeSlide, setActiveSlide] = useState(0);
-  const sectionRef = useRef(null);
-  const activeRef  = useRef(0);
+// ─── Individual 3D tilt card ─────────────────────────────────
+function GalleryCard({ item, i, total, C }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
 
-  // Scroll → slide index, using IntersectionObserver per sentinel div
-  // Each slide gets its own sentinel; when it enters viewport, activate it.
-  // This is rock-solid regardless of image/video size or scroll speed.
-  useEffect(() => {
-    const sentinels = document.querySelectorAll(".gallery-sentinel");
-    if (!sentinels.length) return;
+  // 3D tilt: enters tilted back → flattens → tilts forward as it leaves
+  const rotateX   = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [28, 0, 0, -28]);
+  const scale     = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.82, 1, 1, 0.82]);
+  const opacity   = useTransform(scrollYProgress, [0, 0.18, 0.82, 1], [0, 1, 1, 0]);
+  const y         = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [80, 0, 0, -80]);
+  const captionY  = useTransform(scrollYProgress, [0.2, 0.4], [30, 0]);
+  const captionOp = useTransform(scrollYProgress, [0.2, 0.4, 0.75, 0.9], [0, 1, 1, 0]);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const idx = Number(entry.target.dataset.idx);
-            if (activeRef.current !== idx) {
-              activeRef.current = idx;
-              setActiveSlide(idx);
-            }
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    sentinels.forEach(s => observer.observe(s));
-    return () => observer.disconnect();
-  }, [galleryItems.length]);
+  // Smooth spring on rotateX for buttery feel
+  const rotateXSpring = useSpring(rotateX, { stiffness: 80, damping: 20 });
+  const scaleSpring   = useSpring(scale,   { stiffness: 80, damping: 20 });
 
   return (
-    <section ref={sectionRef} style={{ background: "#000" }}>
+    <div ref={ref} style={{ height: "180vh", position: "relative" }}>
+      {/* Sticky wrapper so card stays visible while section scrolls */}
+      <div style={{
+        position: "sticky", top: 0, height: "100vh",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: "#050505", overflow: "hidden",
+      }}>
 
-      {/* Each slide = 100vh sentinel + sticky media behind it */}
-      {galleryItems.map((item, i) => (
-        <div key={i} className="relative" style={{ height: "100vh" }}>
+        {/* Ambient glow behind card */}
+        <motion.div style={{
+          position: "absolute", inset: 0,
+          background: "radial-gradient(ellipse at 50% 60%, rgba(201,168,76,0.07) 0%, transparent 65%)",
+          opacity,
+        }}/>
 
-          {/* Sticky media layer — fills viewport, sticks while sentinel is in view */}
-          <div className="sticky top-0 overflow-hidden"
-            style={{ height: "100vh", marginBottom: i < galleryItems.length - 1 ? "-100vh" : 0 }}>
+        {/* ── 3D perspective container ── */}
+        <div style={{ perspective: "1100px", width: "100%", height: "100%",
+          display: "flex", alignItems: "center", justifyContent: "center" }}>
 
-            {/* Blurred backdrop — same media stretched to fill, heavily blurred */}
+          <motion.div style={{
+            rotateX: rotateXSpring,
+            scale: scaleSpring,
+            y,
+            opacity,
+            transformStyle: "preserve-3d",
+            width: "clamp(300px, 72vw, 900px)",
+            height: "clamp(220px, 55vw, 620px)",
+            borderRadius: "24px",
+            overflow: "hidden",
+            boxShadow: "0 40px 120px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)",
+            position: "relative",
+          }}>
+
+            {/* Blurred backdrop */}
             {item.type === "video" ? (
-              <video src={item.src} autoPlay muted loop playsInline
-                style={{ position:"absolute", inset:"-10%", width:"120%", height:"120%",
-                  objectFit:"cover", objectPosition:"center",
-                  filter:"blur(28px) brightness(0.45) saturate(1.4)",
-                  transform:"scale(1.05)" }}/>
+              <video src={item.src} autoPlay muted loop playsInline style={{
+                position:"absolute", inset:"-10%", width:"120%", height:"120%",
+                objectFit:"cover", filter:"blur(24px) brightness(0.4) saturate(1.3)",
+                transform:"scale(1.05)"
+              }}/>
             ) : (
-              <img src={item.src} alt=""
-                style={{ position:"absolute", inset:"-10%", width:"120%", height:"120%",
-                  objectFit:"cover", objectPosition:"center",
-                  filter:"blur(28px) brightness(0.45) saturate(1.4)",
-                  transform:"scale(1.05)" }}/>
+              <img src={item.src} alt="" style={{
+                position:"absolute", inset:"-10%", width:"120%", height:"120%",
+                objectFit:"cover", filter:"blur(24px) brightness(0.4) saturate(1.3)",
+                transform:"scale(1.05)"
+              }}/>
             )}
 
-            {/* Actual media — full size, nothing cropped */}
+            {/* Actual media */}
             {item.type === "video" ? (
-              <video
-                src={item.src} autoPlay muted loop playsInline
-                style={{ position:"absolute", inset:0, width:"100%", height:"100%",
-                  objectFit:"contain", objectPosition:"center",
-                  transform: activeSlide === i ? "scale(1)" : "scale(1.02)",
-                  transition:"transform 1s ease" }}/>
+              <video src={item.src} autoPlay muted loop playsInline style={{
+                position:"absolute", inset:0, width:"100%", height:"100%",
+                objectFit:"contain", objectPosition:"center"
+              }}/>
             ) : (
-              <img
-                src={item.src} alt={item.caption}
-                style={{ position:"absolute", inset:0, width:"100%", height:"100%",
-                  objectFit:"contain", objectPosition:"center",
-                  transform: activeSlide === i ? "scale(1)" : "scale(1.02)",
-                  transition:"transform 1s ease" }}/>
+              <img src={item.src} alt={item.caption} style={{
+                position:"absolute", inset:0, width:"100%", height:"100%",
+                objectFit:"contain", objectPosition:"center"
+              }}/>
             )}
 
             {/* Gradient overlay */}
             <div style={{
               position:"absolute", inset:0,
-              background:"linear-gradient(180deg,rgba(0,0,0,0.25) 0%,transparent 25%,transparent 45%,rgba(0,0,0,0.55) 70%,rgba(0,0,0,0.85) 100%)"
-            }}/>
-            {/* Vignette sides */}
-            <div style={{
-              position:"absolute", inset:0,
-              background:"radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)"
+              background:"linear-gradient(180deg,rgba(0,0,0,0.1) 0%,transparent 30%,transparent 45%,rgba(0,0,0,0.7) 80%,rgba(0,0,0,0.92) 100%)"
             }}/>
 
-            {/* Caption — only show on active slide */}
+            {/* Top-edge glass shine */}
             <div style={{
+              position:"absolute", top:0, left:0, right:0, height:"1px",
+              background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)"
+            }}/>
+
+            {/* Caption */}
+            <motion.div style={{
               position:"absolute",
-              bottom:"clamp(20px,5vw,64px)",
-              left:"clamp(16px,4vw,32px)",
-              right:"clamp(56px,12vw,110px)",
-              opacity: activeSlide === i ? 1 : 0,
-              transform: activeSlide === i ? "translateY(0)" : "translateY(16px)",
-              transition: "opacity 0.5s ease, transform 0.5s ease",
-              zIndex: 10
+              bottom:"clamp(16px,3vw,36px)",
+              left:"clamp(16px,3vw,36px)",
+              right:"clamp(50px,8vw,80px)",
+              y: captionY, opacity: captionOp,
             }}>
-              <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"clamp(9px,2vw,11px)",
-                letterSpacing:"0.2em", textTransform:"uppercase",
-                color:"rgba(201,168,76,0.9)", marginBottom:6 }}>
+              <p style={{ fontFamily:"'DM Sans',sans-serif",
+                fontSize:"clamp(9px,1.5vw,11px)", letterSpacing:"0.22em",
+                textTransform:"uppercase", color:"rgba(201,168,76,0.9)", marginBottom:6 }}>
                 {item.tag}
               </p>
               <h3 style={{ fontFamily:"'Playfair Display',Georgia,serif", fontWeight:600,
-                fontSize:"clamp(1.3rem,4vw,3rem)", color:"#fff",
-                textShadow:"0 4px 24px rgba(0,0,0,0.7)", lineHeight:1.2 }}>
+                fontSize:"clamp(1.1rem,3vw,2.2rem)", color:"#fff",
+                textShadow:"0 4px 20px rgba(0,0,0,0.8)", lineHeight:1.2 }}>
                 {item.caption}
               </h3>
-            </div>
+            </motion.div>
 
             {/* Counter */}
             <div style={{ position:"absolute",
-              bottom:"clamp(20px,5vw,64px)",
-              right:"clamp(10px,3vw,32px)",
-              textAlign:"right", zIndex:10 }}>
+              bottom:"clamp(16px,3vw,36px)", right:"clamp(12px,2vw,24px)",
+              textAlign:"right" }}>
               <span style={{ fontFamily:"'Playfair Display',Georgia,serif",
-                fontSize:"clamp(28px,5vw,48px)", fontWeight:600,
+                fontSize:"clamp(22px,4vw,40px)", fontWeight:600,
                 color: C.gold, lineHeight:1 }}>
                 {String(i + 1).padStart(2,"0")}
               </span>
-              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"clamp(11px,2vw,14px)",
-                display:"block", marginTop:4, color:"rgba(255,255,255,0.25)" }}>
-                / {String(galleryItems.length).padStart(2,"0")}
+              <span style={{ fontFamily:"'DM Sans',sans-serif",
+                fontSize:"clamp(10px,1.5vw,13px)", display:"block",
+                marginTop:3, color:"rgba(255,255,255,0.25)" }}>
+                / {String(total).padStart(2,"0")}
               </span>
             </div>
-
-            {/* Progress dots */}
-            <div style={{ position:"absolute", right:"clamp(4px,1.5vw,10px)", top:"50%",
-              transform:"translateY(-50%)", display:"flex", flexDirection:"column",
-              gap:6, zIndex:10 }}>
-              {galleryItems.map((_, di) => (
-                <div key={di} style={{
-                  width:3, borderRadius:9999,
-                  height: activeSlide === di ? 28 : 6,
-                  background: activeSlide === di ? C.gold : "rgba(255,255,255,0.2)",
-                  transition:"all 0.4s ease"
-                }}/>
-              ))}
-            </div>
-          </div>
-
-          {/* Invisible sentinel — IntersectionObserver watches this */}
-          <div className="gallery-sentinel"
-            data-idx={i}
-            style={{ position:"absolute", top:"50%", left:0,
-              width:"100%", height:2, pointerEvents:"none" }}/>
+          </motion.div>
         </div>
+
+        {/* Progress dots — side */}
+        <div style={{ position:"absolute", right:"clamp(6px,2vw,20px)", top:"50%",
+          transform:"translateY(-50%)", display:"flex", flexDirection:"column", gap:6 }}>
+          {Array.from({ length: total }).map((_, di) => (
+            <motion.div key={di} style={{
+              width: 3, borderRadius: 9999,
+              background: di === i ? C.gold : "rgba(255,255,255,0.18)",
+              height: di === i ? 28 : 6,
+              transition: "all 0.4s ease",
+            }}/>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GallerySection({ galleryItems, C }) {
+  return (
+    <section style={{ background: "#050505" }}>
+      {galleryItems.map((item, i) => (
+        <GalleryCard key={i} item={item} i={i} total={galleryItems.length} C={C} />
       ))}
     </section>
   );
