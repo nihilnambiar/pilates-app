@@ -514,8 +514,6 @@ export default function LandingPage() {
               padding:"10px 16px", fontSize:"13px", lineHeight:1}}>
             <span className="hidden sm:inline">Book Your Trial</span>
             <span className="sm:hidden">Book Trial</span>
-            <span className="absolute -top-1.5 -right-1.5 font-body font-semibold px-1.5 py-0.5 rounded-full"
-              style={{background:"#e87a4a", color:C.white, fontSize:"9px", lineHeight:1.5}}>8 left</span>
           </a>
 
           {/* Hamburger — mobile only */}
@@ -700,7 +698,7 @@ export default function LandingPage() {
           <motion.p initial={{opacity:0,y:10}} whileInView={{opacity:1,y:0}}
             viewport={{once:true}} className="font-body text-sm mb-12 -mt-10"
             style={{color:C.muted}}>
-            Trusted by 12+ physiotherapy clinics across Pune · Recommended for post-injury recovery
+            Trusted by physiotherapy clinics across Pune · Recommended for post-injury recovery
           </motion.p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -1166,7 +1164,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 pb-8 flex flex-col sm:flex-row justify-between gap-2 border-t"
           style={{borderColor:"rgba(255,255,255,0.06)"}}>
           <p className="font-body text-xs pt-6" style={{color:"rgba(255,255,255,0.2)"}}>
-            © 2025 Vigour Pilates Studio, Pune. All rights reserved.
+            © 2026 Vigour Pilates Studio, Pune. All rights reserved.
           </p>
           <p className="font-body text-xs pt-6" style={{color:"rgba(201,168,76,0.3)"}}>
             Made with intention in Pune 🌿
