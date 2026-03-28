@@ -1,5 +1,5 @@
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { useRef, useState } from "react";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
 
 import { ArrowRight, Check, Star, ChevronDown, Menu, X, MapPin, Clock, Users } from "lucide-react";
 import ChatBot from "../components/shared/ChatBot";
@@ -307,160 +307,222 @@ const galleryItems = [
 
 // ─── Gallery Section ──────────────────────────────────────────
 // ─── Individual 3D tilt card ─────────────────────────────────
-function GalleryCard({ item, i, total, C }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
+function GallerySection({ galleryItems, C }) {
+  const sectionRef = useRef(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const n = galleryItems.length;
 
-  // 3D tilt: enters tilted back → flattens → tilts forward as it leaves
-  const rotateX   = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [28, 0, 0, -28]);
-  const scale     = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.82, 1, 1, 0.82]);
-  const opacity   = useTransform(scrollYProgress, [0, 0.18, 0.82, 1], [0, 1, 1, 0]);
-  const y         = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [80, 0, 0, -80]);
-  const captionY  = useTransform(scrollYProgress, [0.2, 0.4], [30, 0]);
-  const captionOp = useTransform(scrollYProgress, [0.2, 0.4, 0.75, 0.9], [0, 1, 1, 0]);
+  const { scrollYProgress } = useScroll({ target: sectionRef });
 
-  // Smooth spring on rotateX for buttery feel
-  const rotateXSpring = useSpring(rotateX, { stiffness: 80, damping: 20 });
-  const scaleSpring   = useSpring(scale,   { stiffness: 80, damping: 20 });
+  useEffect(() => {
+    const unsub = scrollYProgress.on("change", v => {
+      const idx = Math.min(Math.floor(v * n), n - 1);
+      setActiveIdx(idx);
+    });
+    return unsub;
+  }, [scrollYProgress, n]);
+
+  const item = galleryItems[activeIdx];
 
   return (
-    <div ref={ref} style={{ height: "180vh", position: "relative" }}>
-      {/* Sticky wrapper so card stays visible while section scrolls */}
+    <section ref={sectionRef} style={{ height: `${n * 100}vh`, position: "relative", background: "#080808" }}>
+
+      {/* Sticky viewport — never leaves screen */}
       <div style={{
-        position: "sticky", top: 0, height: "100vh",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        background: "#050505", overflow: "hidden",
+        position: "sticky", top: 0, height: "100vh", overflow: "hidden",
+        display: "flex", alignItems: "stretch",
       }}>
 
-        {/* Ambient glow behind card */}
-        <motion.div style={{
-          position: "absolute", inset: 0,
-          background: "radial-gradient(ellipse at 50% 60%, rgba(201,168,76,0.07) 0%, transparent 65%)",
-          opacity,
-        }}/>
+        {/* Ambient background glow that shifts per slide */}
+        <AnimatePresence>
+          <motion.div
+            key={`bg-${activeIdx}`}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              background: `radial-gradient(ellipse at 65% 50%, rgba(201,168,76,0.06) 0%, transparent 60%)`,
+            }}
+          />
+        </AnimatePresence>
 
-        {/* ── 3D perspective container ── */}
-        <div style={{ perspective: "1100px", width: "100%", height: "100%",
-          display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {/* ── LEFT PANEL — text ──────────────────────────── */}
+        <div style={{
+          width: "42%", display: "flex", flexDirection: "column",
+          justifyContent: "center", padding: "0 clamp(28px,5vw,80px)",
+          position: "relative", zIndex: 2,
+          borderRight: "1px solid rgba(255,255,255,0.04)",
+        }}>
 
-          <motion.div style={{
-            rotateX: rotateXSpring,
-            scale: scaleSpring,
-            y,
-            opacity,
-            transformStyle: "preserve-3d",
-            width: "clamp(300px, 72vw, 900px)",
-            height: "clamp(220px, 55vw, 620px)",
-            borderRadius: "24px",
-            overflow: "hidden",
-            boxShadow: "0 40px 120px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)",
-            position: "relative",
+          {/* Ghost slide number */}
+          <div style={{
+            position: "absolute", top: "50%", left: "clamp(20px,4vw,60px)",
+            transform: "translateY(-60%)",
+            fontFamily: "'Playfair Display',Georgia,serif",
+            fontSize: "clamp(100px,18vw,200px)", fontWeight: 700,
+            color: "rgba(255,255,255,0.025)", lineHeight: 1,
+            userSelect: "none", pointerEvents: "none",
           }}>
+            {String(activeIdx + 1).padStart(2, "0")}
+          </div>
 
-            {/* Blurred backdrop */}
-            {item.type === "video" ? (
-              <video src={item.src} autoPlay muted loop playsInline style={{
-                position:"absolute", inset:"-10%", width:"120%", height:"120%",
-                objectFit:"cover", filter:"blur(24px) brightness(0.4) saturate(1.3)",
-                transform:"scale(1.05)"
-              }}/>
-            ) : (
-              <img src={item.src} alt="" style={{
-                position:"absolute", inset:"-10%", width:"120%", height:"120%",
-                objectFit:"cover", filter:"blur(24px) brightness(0.4) saturate(1.3)",
-                transform:"scale(1.05)"
-              }}/>
-            )}
-
-            {/* Actual media */}
-            {item.type === "video" ? (
-              <video src={item.src} autoPlay muted loop playsInline style={{
-                position:"absolute", inset:0, width:"100%", height:"100%",
-                objectFit:"contain", objectPosition:"center"
-              }}/>
-            ) : (
-              <img src={item.src} alt={item.caption} style={{
-                position:"absolute", inset:0, width:"100%", height:"100%",
-                objectFit:"contain", objectPosition:"center"
-              }}/>
-            )}
-
-            {/* Gradient overlay */}
-            <div style={{
-              position:"absolute", inset:0,
-              background:"linear-gradient(180deg,rgba(0,0,0,0.1) 0%,transparent 30%,transparent 45%,rgba(0,0,0,0.7) 80%,rgba(0,0,0,0.92) 100%)"
-            }}/>
-
-            {/* Top-edge glass shine */}
-            <div style={{
-              position:"absolute", top:0, left:0, right:0, height:"1px",
-              background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)"
-            }}/>
-
-            {/* Caption */}
-            <motion.div style={{
-              position:"absolute",
-              bottom:"clamp(16px,3vw,36px)",
-              left:"clamp(16px,3vw,36px)",
-              right:"clamp(50px,8vw,80px)",
-              y: captionY, opacity: captionOp,
+          {/* Counter pill */}
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            marginBottom: 36,
+          }}>
+            <span style={{
+              fontFamily: "'DM Sans',sans-serif", fontSize: 11,
+              letterSpacing: "0.2em", textTransform: "uppercase",
+              color: "rgba(255,255,255,0.3)",
             }}>
-              <p style={{ fontFamily:"'DM Sans',sans-serif",
-                fontSize:"clamp(9px,1.5vw,11px)", letterSpacing:"0.22em",
-                textTransform:"uppercase", color:"rgba(201,168,76,0.9)", marginBottom:6 }}>
+              {String(activeIdx + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
+            </span>
+            {/* Animated progress line */}
+            <div style={{ flex: 1, maxWidth: 60, height: 1, background: "rgba(255,255,255,0.1)", borderRadius: 1, overflow: "hidden" }}>
+              <motion.div
+                style={{ height: "100%", background: C.gold, borderRadius: 1 }}
+                animate={{ width: `${((activeIdx + 1) / n) * 100}%` }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              />
+            </div>
+          </div>
+
+          {/* Animated text block */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIdx}
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <p style={{
+                fontFamily: "'DM Sans',sans-serif",
+                fontSize: "clamp(10px,1.2vw,12px)", letterSpacing: "0.25em",
+                textTransform: "uppercase", color: C.gold,
+                marginBottom: 16,
+              }}>
                 {item.tag}
               </p>
-              <h3 style={{ fontFamily:"'Playfair Display',Georgia,serif", fontWeight:600,
-                fontSize:"clamp(1.1rem,3vw,2.2rem)", color:"#fff",
-                textShadow:"0 4px 20px rgba(0,0,0,0.8)", lineHeight:1.2 }}>
+              <h2 style={{
+                fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 600,
+                fontSize: "clamp(1.6rem,3.5vw,3rem)", color: "#fff",
+                lineHeight: 1.2, marginBottom: 24,
+              }}>
                 {item.caption}
-              </h3>
+              </h2>
+              <div style={{ width: 40, height: 2, background: C.gold, borderRadius: 2, marginBottom: 24 }}/>
+              <p style={{
+                fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(13px,1.2vw,15px)",
+                color: "rgba(255,255,255,0.38)", lineHeight: 1.7,
+                maxWidth: 320,
+              }}>
+                Every session at Vigour is capped at 12 students — so each body gets the attention it deserves.
+              </p>
             </motion.div>
+          </AnimatePresence>
 
-            {/* Counter */}
-            <div style={{ position:"absolute",
-              bottom:"clamp(16px,3vw,36px)", right:"clamp(12px,2vw,24px)",
-              textAlign:"right" }}>
-              <span style={{ fontFamily:"'Playfair Display',Georgia,serif",
-                fontSize:"clamp(22px,4vw,40px)", fontWeight:600,
-                color: C.gold, lineHeight:1 }}>
-                {String(i + 1).padStart(2,"0")}
-              </span>
-              <span style={{ fontFamily:"'DM Sans',sans-serif",
-                fontSize:"clamp(10px,1.5vw,13px)", display:"block",
-                marginTop:3, color:"rgba(255,255,255,0.25)" }}>
-                / {String(total).padStart(2,"0")}
-              </span>
-            </div>
-          </motion.div>
+          {/* Vertical progress dots */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 48 }}>
+            {galleryItems.map((_, di) => (
+              <div
+                key={di}
+                style={{
+                  height: 3, borderRadius: 9999,
+                  width: di === activeIdx ? 32 : 12,
+                  background: di === activeIdx ? C.gold : "rgba(255,255,255,0.15)",
+                  transition: "all 0.4s ease",
+                }}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Progress dots — side */}
-        <div style={{ position:"absolute", right:"clamp(6px,2vw,20px)", top:"50%",
-          transform:"translateY(-50%)", display:"flex", flexDirection:"column", gap:6 }}>
-          {Array.from({ length: total }).map((_, di) => (
-            <motion.div key={di} style={{
-              width: 3, borderRadius: 9999,
-              background: di === i ? C.gold : "rgba(255,255,255,0.18)",
-              height: di === i ? 28 : 6,
-              transition: "all 0.4s ease",
-            }}/>
-          ))}
+        {/* ── RIGHT PANEL — media card ───────────────────── */}
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "clamp(20px,3vw,48px)", position: "relative", perspective: "1200px",
+        }}>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIdx}
+              initial={{ rotateY: 18, scale: 0.88, opacity: 0, x: 60 }}
+              animate={{ rotateY: 0,  scale: 1,    opacity: 1, x: 0  }}
+              exit={{    rotateY: -14, scale: 0.88, opacity: 0, x: -40 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                transformStyle: "preserve-3d",
+                width: "100%", height: "clamp(260px,60vh,620px)",
+                borderRadius: 20, overflow: "hidden", position: "relative",
+                boxShadow: "0 32px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.07)",
+              }}
+            >
+              {/* Blurred backdrop fill */}
+              {item.type === "video" ? (
+                <video src={item.src} autoPlay muted loop playsInline style={{
+                  position:"absolute", inset:"-10%", width:"120%", height:"120%",
+                  objectFit:"cover", filter:"blur(22px) brightness(0.35) saturate(1.3)",
+                  transform:"scale(1.05)", pointerEvents:"none",
+                }}/>
+              ) : (
+                <img src={item.src} alt="" style={{
+                  position:"absolute", inset:"-10%", width:"120%", height:"120%",
+                  objectFit:"cover", filter:"blur(22px) brightness(0.35) saturate(1.3)",
+                  transform:"scale(1.05)", pointerEvents:"none",
+                }}/>
+              )}
+
+              {/* Actual media — contain, no crop */}
+              {item.type === "video" ? (
+                <video src={item.src} autoPlay muted loop playsInline style={{
+                  position:"absolute", inset:0, width:"100%", height:"100%",
+                  objectFit:"contain", objectPosition:"center",
+                }}/>
+              ) : (
+                <img src={item.src} alt={item.caption} style={{
+                  position:"absolute", inset:0, width:"100%", height:"100%",
+                  objectFit:"contain", objectPosition:"center",
+                }}/>
+              )}
+
+              {/* Subtle inner vignette */}
+              <div style={{
+                position:"absolute", inset:0, pointerEvents:"none",
+                background:"radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 100%)",
+              }}/>
+
+              {/* Top shine edge */}
+              <div style={{
+                position:"absolute", top:0, left:0, right:0, height:1,
+                background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)",
+              }}/>
+            </motion.div>
+          </AnimatePresence>
         </div>
+
+        {/* ── Scroll hint (fades after first slide) ─────── */}
+        <AnimatePresence>
+          {activeIdx === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{
+                position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+              }}
+            >
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10,
+                letterSpacing:"0.2em", textTransform:"uppercase",
+                color:"rgba(255,255,255,0.25)" }}>Scroll</span>
+              <motion.div
+                animate={{ y: [0, 6, 0] }} transition={{ duration: 1.4, repeat: Infinity }}
+                style={{ width:1, height:24, background:"rgba(255,255,255,0.2)", borderRadius:1 }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
-  );
-}
-
-function GallerySection({ galleryItems, C }) {
-  return (
-    <section style={{ background: "#050505" }}>
-      {galleryItems.map((item, i) => (
-        <GalleryCard key={i} item={item} i={i} total={galleryItems.length} C={C} />
-      ))}
     </section>
   );
 }
