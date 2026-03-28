@@ -1,5 +1,8 @@
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 
 import { ArrowRight, Check, Star, ChevronDown, Menu, X, MapPin, Clock, Users } from "lucide-react";
 import ChatBot from "../components/shared/ChatBot";
@@ -307,101 +310,152 @@ const galleryItems = [
 
 // ─── Gallery Section ──────────────────────────────────────────
 // ─── Individual 3D tilt card ─────────────────────────────────
-// Single slide — has its own sticky panel + sentinel
-function GallerySlide({ item, i, total, activeIdx, C }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const rotateX       = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [22, 0, 0, -22]);
-  const cardScale     = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0.88, 1, 1, 0.88]);
-  const rotateXSpring = useSpring(rotateX,   { stiffness: 65, damping: 18 });
-  const scaleSpring   = useSpring(cardScale, { stiffness: 65, damping: 18 });
+// ─── GSAP Gallery Section ─────────────────────────────────────
+function GallerySection({ galleryItems, C }) {
+  const sectionRef  = useRef(null);
+  const textRefs    = useRef([]);
+  const cardRefs    = useRef([]);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const n = galleryItems.length;
 
-  const isActive = activeIdx === i;
+  useEffect(() => {
+    const texts = textRefs.current;
+    const cards = cardRefs.current;
+    if (!texts.length || !cards.length) return;
+
+    // Hide all slides except the first
+    gsap.set(texts.slice(1), { opacity: 0, y: 50 });
+    gsap.set(cards.slice(1), { opacity: 0, rotateY: 22, scale: 0.86, transformPerspective: 1100 });
+    gsap.set(cards[0],       { opacity: 1, rotateY: 0,  scale: 1,    transformPerspective: 1100 });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1,
+        onUpdate: (self) => {
+          const idx = Math.min(Math.floor(self.progress * n), n - 1);
+          setActiveIdx(idx);
+        },
+      },
+    });
+
+    // Each slide transition gets equal scroll space
+    for (let i = 0; i < n - 1; i++) {
+      tl
+        .to(texts[i],     { opacity: 0, y: -50, duration: 1, ease: "power2.in" },     i * 2)
+        .to(cards[i],     { opacity: 0, rotateY: -22, scale: 0.86, duration: 1, ease: "power2.in" }, i * 2)
+        .to(texts[i + 1], { opacity: 1, y: 0,   duration: 1, ease: "power2.out" },    i * 2 + 1)
+        .to(cards[i + 1], { opacity: 1, rotateY: 0,   scale: 1,    duration: 1, ease: "power2.out" }, i * 2 + 0.6);
+    }
+
+    return () => {
+      tl.kill();
+      ScrollTrigger.getAll().forEach(st => st.kill());
+    };
+  }, [n]);
 
   return (
-    <div ref={ref} style={{ height: "100vh", position: "relative" }}>
-
-      {/* Sticky split-screen panel */}
+    <section
+      ref={sectionRef}
+      style={{ height: `${n * 100}vh`, background: "#080808" }}
+    >
+      {/* ── Sticky viewport ─────────────────────────── */}
       <div style={{
-        position: "sticky", top: 0, height: "100vh", overflow: "hidden",
-        display: "flex", alignItems: "stretch", background: "#080808",
+        position: "sticky", top: 0, height: "100vh",
+        display: "flex", alignItems: "stretch", overflow: "hidden",
       }}>
 
-        {/* Ambient gold glow */}
+        {/* Ambient glow */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
           background: "radial-gradient(ellipse at 68% 50%, rgba(201,168,76,0.055) 0%, transparent 58%)",
         }}/>
 
-        {/* ── LEFT: text ─────────────────────────────────── */}
+        {/* ── LEFT: text panels ────────────────────── */}
         <div style={{
-          width: "42%", display: "flex", flexDirection: "column",
-          justifyContent: "center", padding: "0 clamp(24px,5vw,72px)",
-          position: "relative", zIndex: 2,
+          width: "42%", position: "relative",
           borderRight: "1px solid rgba(255,255,255,0.04)",
+          overflow: "hidden",
         }}>
 
-          {/* Ghost number */}
+          {/* Ghost number — React driven */}
           <div style={{
             position: "absolute", top: "50%", left: "clamp(16px,3vw,48px)",
             transform: "translateY(-55%)", pointerEvents: "none", userSelect: "none",
             fontFamily: "'Playfair Display',Georgia,serif",
-            fontSize: "clamp(90px,16vw,180px)", fontWeight: 700,
+            fontSize: "clamp(90px,15vw,170px)", fontWeight: 700,
             color: "rgba(255,255,255,0.022)", lineHeight: 1,
+            transition: "opacity 0.4s",
           }}>
-            {String(i + 1).padStart(2, "0")}
+            {String(activeIdx + 1).padStart(2, "0")}
           </div>
 
-          {/* Counter + progress bar */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 36 }}>
+          {/* Counter + progress bar — React driven */}
+          <div style={{
+            position: "absolute", top: "clamp(28px,5vh,56px)",
+            left: "clamp(24px,5vw,72px)",
+            display: "flex", alignItems: "center", gap: 10,
+          }}>
             <span style={{
               fontFamily: "'DM Sans',sans-serif", fontSize: 11,
               letterSpacing: "0.2em", textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
             }}>
-              {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+              {String(activeIdx + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
             </span>
             <div style={{ width: 52, height: 1, background: "rgba(255,255,255,0.08)", borderRadius: 1, overflow: "hidden" }}>
               <div style={{
                 height: "100%", borderRadius: 1, background: C.gold,
-                width: `${((i + 1) / total) * 100}%`,
+                width: `${((activeIdx + 1) / n) * 100}%`,
                 transition: "width 0.5s ease",
               }}/>
             </div>
           </div>
 
-          {/* Tag */}
-          <p style={{
-            fontFamily: "'DM Sans',sans-serif",
-            fontSize: "clamp(9px,1.1vw,11px)", letterSpacing: "0.28em",
-            textTransform: "uppercase", color: C.gold, marginBottom: 14,
+          {/* GSAP-animated text panels */}
+          {galleryItems.map((item, i) => (
+            <div
+              key={i}
+              ref={el => { textRefs.current[i] = el; }}
+              style={{
+                position: "absolute", inset: 0,
+                display: "flex", flexDirection: "column", justifyContent: "center",
+                padding: "0 clamp(24px,5vw,72px)",
+              }}
+            >
+              <p style={{
+                fontFamily: "'DM Sans',sans-serif",
+                fontSize: "clamp(9px,1.1vw,11px)", letterSpacing: "0.28em",
+                textTransform: "uppercase", color: C.gold, marginBottom: 14,
+              }}>
+                {item.tag}
+              </p>
+              <h2 style={{
+                fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 600,
+                fontSize: "clamp(1.5rem,3.2vw,2.8rem)", color: "#fff",
+                lineHeight: 1.18, marginBottom: 22,
+              }}>
+                {item.caption}
+              </h2>
+              <div style={{ width: 36, height: 2, background: C.gold, borderRadius: 2, marginBottom: 20 }}/>
+              <p style={{
+                fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(13px,1.1vw,15px)",
+                color: "rgba(255,255,255,0.35)", lineHeight: 1.72, maxWidth: 300,
+              }}>
+                Every session at Vigour is capped at 12 students — so each body gets the attention it deserves.
+              </p>
+            </div>
+          ))}
+
+          {/* Progress pills — React driven */}
+          <div style={{
+            position: "absolute", bottom: "clamp(28px,5vh,56px)",
+            left: "clamp(24px,5vw,72px)",
+            display: "flex", gap: 6,
           }}>
-            {item.tag}
-          </p>
-
-          {/* Headline */}
-          <h2 style={{
-            fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 600,
-            fontSize: "clamp(1.5rem,3.2vw,2.8rem)", color: "#fff",
-            lineHeight: 1.18, marginBottom: 22,
-          }}>
-            {item.caption}
-          </h2>
-
-          {/* Gold rule */}
-          <div style={{ width: 36, height: 2, background: C.gold, borderRadius: 2, marginBottom: 20 }}/>
-
-          {/* Body */}
-          <p style={{
-            fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(13px,1.1vw,15px)",
-            color: "rgba(255,255,255,0.35)", lineHeight: 1.72, maxWidth: 300,
-          }}>
-            Every session at Vigour is capped at 12 students — so each body gets the attention it deserves.
-          </p>
-
-          {/* Progress pills */}
-          <div style={{ display: "flex", gap: 6, marginTop: 44 }}>
-            {Array.from({ length: total }).map((_, di) => (
+            {galleryItems.map((_, di) => (
               <div key={di} style={{
                 height: 3, borderRadius: 9999,
                 width: di === activeIdx ? 28 : 10,
@@ -412,123 +466,76 @@ function GallerySlide({ item, i, total, activeIdx, C }) {
           </div>
         </div>
 
-        {/* ── RIGHT: 3D card ──────────────────────────────── */}
+        {/* ── RIGHT: card panels ───────────────────── */}
         <div style={{
-          flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-          padding: "clamp(16px,2.5vw,40px)", perspective: "1100px",
+          flex: 1, position: "relative",
+          padding: "clamp(16px,2.5vw,40px)",
         }}>
-          <motion.div style={{
-            rotateX: rotateXSpring,
-            scale: scaleSpring,
-            transformStyle: "preserve-3d",
-            width: "100%", height: "clamp(240px,58vh,600px)",
-            borderRadius: 18, overflow: "hidden", position: "relative",
-            boxShadow: "0 28px 72px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
-          }}>
-
-            {/* Blurred backdrop */}
-            {item.type === "video" ? (
-              <video src={item.src} autoPlay muted loop playsInline style={{
-                position:"absolute", inset:"-10%", width:"120%", height:"120%",
-                objectFit:"cover", filter:"blur(22px) brightness(0.32) saturate(1.3)",
-                transform:"scale(1.05)", pointerEvents:"none",
+          {galleryItems.map((item, i) => (
+            <div
+              key={i}
+              ref={el => { cardRefs.current[i] = el; }}
+              style={{
+                position: "absolute",
+                inset: "clamp(16px,2.5vw,40px)",
+                borderRadius: 18, overflow: "hidden",
+                boxShadow: "0 28px 72px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
+              }}
+            >
+              {/* Blurred backdrop */}
+              {item.type === "video" ? (
+                <video src={item.src} autoPlay muted loop playsInline style={{
+                  position:"absolute", inset:"-10%", width:"120%", height:"120%",
+                  objectFit:"cover", filter:"blur(22px) brightness(0.32) saturate(1.3)",
+                  transform:"scale(1.05)", pointerEvents:"none",
+                }}/>
+              ) : (
+                <img src={item.src} alt="" style={{
+                  position:"absolute", inset:"-10%", width:"120%", height:"120%",
+                  objectFit:"cover", filter:"blur(22px) brightness(0.32) saturate(1.3)",
+                  transform:"scale(1.05)", pointerEvents:"none",
+                }}/>
+              )}
+              {/* Actual media */}
+              {item.type === "video" ? (
+                <video src={item.src} autoPlay muted loop playsInline style={{
+                  position:"absolute", inset:0, width:"100%", height:"100%",
+                  objectFit:"contain", objectPosition:"center",
+                }}/>
+              ) : (
+                <img src={item.src} alt={item.caption} style={{
+                  position:"absolute", inset:0, width:"100%", height:"100%",
+                  objectFit:"contain", objectPosition:"center",
+                }}/>
+              )}
+              {/* Vignette */}
+              <div style={{
+                position:"absolute", inset:0, pointerEvents:"none",
+                background:"radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,0.3) 100%)",
               }}/>
-            ) : (
-              <img src={item.src} alt="" style={{
-                position:"absolute", inset:"-10%", width:"120%", height:"120%",
-                objectFit:"cover", filter:"blur(22px) brightness(0.32) saturate(1.3)",
-                transform:"scale(1.05)", pointerEvents:"none",
+              {/* Shine edge */}
+              <div style={{
+                position:"absolute", top:0, left:0, right:0, height:1,
+                background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.14),transparent)",
               }}/>
-            )}
-
-            {/* Actual media — no crop */}
-            {item.type === "video" ? (
-              <video src={item.src} autoPlay muted loop playsInline style={{
-                position:"absolute", inset:0, width:"100%", height:"100%",
-                objectFit:"contain", objectPosition:"center",
-              }}/>
-            ) : (
-              <img src={item.src} alt={item.caption} style={{
-                position:"absolute", inset:0, width:"100%", height:"100%",
-                objectFit:"contain", objectPosition:"center",
-              }}/>
-            )}
-
-            {/* Vignette */}
-            <div style={{
-              position:"absolute", inset:0, pointerEvents:"none",
-              background:"radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,0.3) 100%)",
-            }}/>
-            {/* Top shine */}
-            <div style={{
-              position:"absolute", top:0, left:0, right:0, height:1,
-              background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.14),transparent)",
-            }}/>
-          </motion.div>
+            </div>
+          ))}
         </div>
 
-        {/* Scroll hint on first slide only */}
-        {i === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: isActive ? 1 : 0 }}
-            style={{
-              position:"absolute", bottom:24, left:"50%", transform:"translateX(-50%)",
-              display:"flex", flexDirection:"column", alignItems:"center", gap:6,
-              pointerEvents:"none",
-            }}
-          >
+        {/* Scroll hint */}
+        {activeIdx === 0 && (
+          <div style={{
+            position:"absolute", bottom:24, left:"50%", transform:"translateX(-50%)",
+            display:"flex", flexDirection:"column", alignItems:"center", gap:6,
+            pointerEvents:"none",
+          }}>
             <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:9,
               letterSpacing:"0.22em", textTransform:"uppercase",
-              color:"rgba(255,255,255,0.22)" }}>Scroll</span>
-            <motion.div animate={{ y:[0,6,0] }} transition={{ duration:1.4, repeat:Infinity }}
-              style={{ width:1, height:20, background:"rgba(255,255,255,0.18)", borderRadius:1 }}/>
-          </motion.div>
+              color:"rgba(255,255,255,0.2)" }}>Scroll</span>
+            <div style={{ width:1, height:20, background:"rgba(255,255,255,0.15)", borderRadius:1 }}/>
+          </div>
         )}
       </div>
-
-      {/* Sentinel — IntersectionObserver target */}
-      <div className="gsent" data-idx={i} style={{
-        position:"absolute", top:"50%", left:0,
-        width:"100%", height:2, pointerEvents:"none",
-      }}/>
-    </div>
-  );
-}
-
-function GallerySection({ galleryItems, C }) {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const activeRef = useRef(0);
-
-  useEffect(() => {
-    const sentinels = document.querySelectorAll(".gsent");
-    if (!sentinels.length) return;
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const idx = Number(entry.target.dataset.idx);
-            if (activeRef.current !== idx) {
-              activeRef.current = idx;
-              setActiveIdx(idx);
-            }
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-    sentinels.forEach(s => observer.observe(s));
-    return () => observer.disconnect();
-  }, [galleryItems.length]);
-
-  return (
-    <section style={{ background: "#080808" }}>
-      {galleryItems.map((item, i) => (
-        <GallerySlide
-          key={i} item={item} i={i}
-          total={galleryItems.length}
-          activeIdx={activeIdx} C={C}
-        />
-      ))}
     </section>
   );
 }
