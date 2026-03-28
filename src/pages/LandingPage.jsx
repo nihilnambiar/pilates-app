@@ -312,15 +312,21 @@ function GallerySection({ galleryItems, C }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const n = galleryItems.length;
 
-  const { scrollYProgress } = useScroll({ target: sectionRef });
-
   useEffect(() => {
-    const unsub = scrollYProgress.on("change", v => {
-      const idx = Math.min(Math.floor(v * n), n - 1);
+    const section = sectionRef.current;
+    if (!section) return;
+    const onScroll = () => {
+      const rect = section.getBoundingClientRect();
+      const scrolled = -rect.top;
+      const scrollable = section.offsetHeight - window.innerHeight;
+      const progress = Math.max(0, Math.min(1, scrolled / scrollable));
+      const idx = Math.min(Math.floor(progress * n), n - 1);
       setActiveIdx(idx);
-    });
-    return unsub;
-  }, [scrollYProgress, n]);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [n]);
 
   const item = galleryItems[activeIdx];
 
