@@ -311,60 +311,57 @@ const galleryItems = [
 // ─── Gallery Section ──────────────────────────────────────────
 // ─── Individual 3D tilt card ─────────────────────────────────
 // ─── GSAP Gallery Section ─────────────────────────────────────
+// ─── GSAP Gallery — pin: true handles scroll space ───────────
 function GallerySection({ galleryItems, C }) {
-  const sectionRef  = useRef(null);
-  const textRefs    = useRef([]);
-  const cardRefs    = useRef([]);
+  const containerRef = useRef(null);
+  const textRefs     = useRef([]);
+  const cardRefs     = useRef([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const n = galleryItems.length;
 
   useEffect(() => {
-    const texts = textRefs.current;
-    const cards = cardRefs.current;
-    if (!texts.length || !cards.length) return;
+    const ctx = gsap.context(() => {
+      // Initial state: only slide 0 visible
+      gsap.set(textRefs.current.slice(1), { opacity: 0, y: 60 });
+      gsap.set(cardRefs.current.slice(1), {
+        opacity: 0, rotationY: 24, scale: 0.86, transformPerspective: 1100,
+      });
+      gsap.set(cardRefs.current[0], {
+        opacity: 1, rotationY: 0, scale: 1, transformPerspective: 1100,
+      });
 
-    // Hide all slides except the first
-    gsap.set(texts.slice(1), { opacity: 0, y: 50 });
-    gsap.set(cards.slice(1), { opacity: 0, rotateY: 22, scale: 0.86, transformPerspective: 1100 });
-    gsap.set(cards[0],       { opacity: 1, rotateY: 0,  scale: 1,    transformPerspective: 1100 });
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1,
-        onUpdate: (self) => {
-          const idx = Math.min(Math.floor(self.progress * n), n - 1);
-          setActiveIdx(idx);
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: `+=${(n - 1) * window.innerHeight}`,
+          scrub: 1,
+          pin: true,
+          anticipatePin: 1,
+          onUpdate(self) {
+            setActiveIdx(Math.min(Math.floor(self.progress * n), n - 1));
+          },
         },
-      },
-    });
+      });
 
-    // Each slide transition gets equal scroll space
-    for (let i = 0; i < n - 1; i++) {
-      tl
-        .to(texts[i],     { opacity: 0, y: -50, duration: 1, ease: "power2.in" },     i * 2)
-        .to(cards[i],     { opacity: 0, rotateY: -22, scale: 0.86, duration: 1, ease: "power2.in" }, i * 2)
-        .to(texts[i + 1], { opacity: 1, y: 0,   duration: 1, ease: "power2.out" },    i * 2 + 1)
-        .to(cards[i + 1], { opacity: 1, rotateY: 0,   scale: 1,    duration: 1, ease: "power2.out" }, i * 2 + 0.6);
-    }
+      for (let i = 0; i < n - 1; i++) {
+        const step = i * 2;
+        tl
+          .to(textRefs.current[i],     { opacity: 0, y: -60, duration: 1, ease: "power2.in" },  step)
+          .to(cardRefs.current[i],     { opacity: 0, rotationY: -24, scale: 0.86, duration: 1, ease: "power2.in" }, step)
+          .to(textRefs.current[i + 1], { opacity: 1, y: 0,   duration: 1, ease: "power2.out" }, step + 1)
+          .to(cardRefs.current[i + 1], { opacity: 1, rotationY: 0, scale: 1, duration: 1, ease: "power2.out" }, step + 0.7);
+      }
+    }, containerRef);
 
-    return () => {
-      tl.kill();
-      ScrollTrigger.getAll().forEach(st => st.kill());
-    };
+    return () => ctx.revert();
   }, [n]);
 
   return (
-    <section
-      ref={sectionRef}
-      style={{ height: `${n * 100}vh`, background: "#080808" }}
-    >
-      {/* ── Sticky viewport ─────────────────────────── */}
+    <section ref={containerRef} style={{ background: "#080808" }}>
+      {/* 100vh inner — GSAP pins this whole section, no CSS sticky needed */}
       <div style={{
-        position: "sticky", top: 0, height: "100vh",
-        display: "flex", alignItems: "stretch", overflow: "hidden",
+        height: "100vh", display: "flex", alignItems: "stretch", overflow: "hidden",
       }}>
 
         {/* Ambient glow */}
@@ -373,35 +370,32 @@ function GallerySection({ galleryItems, C }) {
           background: "radial-gradient(ellipse at 68% 50%, rgba(201,168,76,0.055) 0%, transparent 58%)",
         }}/>
 
-        {/* ── LEFT: text panels ────────────────────── */}
+        {/* ── LEFT: text ──────────────────────────────── */}
         <div style={{
-          width: "42%", position: "relative",
-          borderRight: "1px solid rgba(255,255,255,0.04)",
-          overflow: "hidden",
+          width: "42%", position: "relative", overflow: "hidden",
+          borderRight: "1px solid rgba(255,255,255,0.05)",
         }}>
-
-          {/* Ghost number — React driven */}
+          {/* Ghost number */}
           <div style={{
             position: "absolute", top: "50%", left: "clamp(16px,3vw,48px)",
             transform: "translateY(-55%)", pointerEvents: "none", userSelect: "none",
             fontFamily: "'Playfair Display',Georgia,serif",
-            fontSize: "clamp(90px,15vw,170px)", fontWeight: 700,
+            fontSize: "clamp(90px,14vw,160px)", fontWeight: 700,
             color: "rgba(255,255,255,0.022)", lineHeight: 1,
-            transition: "opacity 0.4s",
           }}>
             {String(activeIdx + 1).padStart(2, "0")}
           </div>
 
-          {/* Counter + progress bar — React driven */}
+          {/* Counter + progress bar */}
           <div style={{
-            position: "absolute", top: "clamp(28px,5vh,56px)",
+            position: "absolute", top: "clamp(24px,4vh,48px)",
             left: "clamp(24px,5vw,72px)",
-            display: "flex", alignItems: "center", gap: 10,
+            display: "flex", alignItems: "center", gap: 10, zIndex: 2,
           }}>
             <span style={{
               fontFamily: "'DM Sans',sans-serif", fontSize: 11,
               letterSpacing: "0.2em", textTransform: "uppercase",
-              color: "rgba(255,255,255,0.28)",
+              color: "rgba(255,255,255,0.3)",
             }}>
               {String(activeIdx + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
             </span>
@@ -414,7 +408,7 @@ function GallerySection({ galleryItems, C }) {
             </div>
           </div>
 
-          {/* GSAP-animated text panels */}
+          {/* GSAP-animated text panels — all stacked absolutely */}
           {galleryItems.map((item, i) => (
             <div
               key={i}
@@ -426,20 +420,16 @@ function GallerySection({ galleryItems, C }) {
               }}
             >
               <p style={{
-                fontFamily: "'DM Sans',sans-serif",
-                fontSize: "clamp(9px,1.1vw,11px)", letterSpacing: "0.28em",
-                textTransform: "uppercase", color: C.gold, marginBottom: 14,
-              }}>
-                {item.tag}
-              </p>
+                fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(9px,1vw,11px)",
+                letterSpacing: "0.28em", textTransform: "uppercase",
+                color: C.gold, marginBottom: 14,
+              }}>{item.tag}</p>
               <h2 style={{
                 fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 600,
-                fontSize: "clamp(1.5rem,3.2vw,2.8rem)", color: "#fff",
-                lineHeight: 1.18, marginBottom: 22,
-              }}>
-                {item.caption}
-              </h2>
-              <div style={{ width: 36, height: 2, background: C.gold, borderRadius: 2, marginBottom: 20 }}/>
+                fontSize: "clamp(1.5rem,3vw,2.8rem)", color: "#fff",
+                lineHeight: 1.18, marginBottom: 20,
+              }}>{item.caption}</h2>
+              <div style={{ width: 36, height: 2, background: C.gold, borderRadius: 2, marginBottom: 18 }}/>
               <p style={{
                 fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(13px,1.1vw,15px)",
                 color: "rgba(255,255,255,0.35)", lineHeight: 1.72, maxWidth: 300,
@@ -449,11 +439,11 @@ function GallerySection({ galleryItems, C }) {
             </div>
           ))}
 
-          {/* Progress pills — React driven */}
+          {/* Progress pills */}
           <div style={{
-            position: "absolute", bottom: "clamp(28px,5vh,56px)",
+            position: "absolute", bottom: "clamp(24px,4vh,48px)",
             left: "clamp(24px,5vw,72px)",
-            display: "flex", gap: 6,
+            display: "flex", gap: 6, zIndex: 2,
           }}>
             {galleryItems.map((_, di) => (
               <div key={di} style={{
@@ -466,11 +456,8 @@ function GallerySection({ galleryItems, C }) {
           </div>
         </div>
 
-        {/* ── RIGHT: card panels ───────────────────── */}
-        <div style={{
-          flex: 1, position: "relative",
-          padding: "clamp(16px,2.5vw,40px)",
-        }}>
+        {/* ── RIGHT: card panels ──────────────────────── */}
+        <div style={{ flex: 1, position: "relative" }}>
           {galleryItems.map((item, i) => (
             <div
               key={i}
@@ -482,7 +469,6 @@ function GallerySection({ galleryItems, C }) {
                 boxShadow: "0 28px 72px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
               }}
             >
-              {/* Blurred backdrop */}
               {item.type === "video" ? (
                 <video src={item.src} autoPlay muted loop playsInline style={{
                   position:"absolute", inset:"-10%", width:"120%", height:"120%",
@@ -496,7 +482,6 @@ function GallerySection({ galleryItems, C }) {
                   transform:"scale(1.05)", pointerEvents:"none",
                 }}/>
               )}
-              {/* Actual media */}
               {item.type === "video" ? (
                 <video src={item.src} autoPlay muted loop playsInline style={{
                   position:"absolute", inset:0, width:"100%", height:"100%",
@@ -508,33 +493,17 @@ function GallerySection({ galleryItems, C }) {
                   objectFit:"contain", objectPosition:"center",
                 }}/>
               )}
-              {/* Vignette */}
               <div style={{
                 position:"absolute", inset:0, pointerEvents:"none",
-                background:"radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,0.3) 100%)",
+                background:"radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,0.28) 100%)",
               }}/>
-              {/* Shine edge */}
               <div style={{
                 position:"absolute", top:0, left:0, right:0, height:1,
-                background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.14),transparent)",
+                background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.13),transparent)",
               }}/>
             </div>
           ))}
         </div>
-
-        {/* Scroll hint */}
-        {activeIdx === 0 && (
-          <div style={{
-            position:"absolute", bottom:24, left:"50%", transform:"translateX(-50%)",
-            display:"flex", flexDirection:"column", alignItems:"center", gap:6,
-            pointerEvents:"none",
-          }}>
-            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:9,
-              letterSpacing:"0.22em", textTransform:"uppercase",
-              color:"rgba(255,255,255,0.2)" }}>Scroll</span>
-            <div style={{ width:1, height:20, background:"rgba(255,255,255,0.15)", borderRadius:1 }}/>
-          </div>
-        )}
       </div>
     </section>
   );
@@ -559,8 +528,8 @@ export default function LandingPage() {
   const heroOpacity = useTransform(scrollYProgress, [0,0.18], [1,0]);
 
   return (
-    <div ref={containerRef} className="font-body overflow-x-hidden"
-      style={{ background:C.cream, color:C.black }}>
+    <div ref={containerRef} className="font-body"
+      style={{ background:C.cream, color:C.black, overflowX:"clip" }}>
 
       {/* ── NAV ─────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b"
