@@ -539,8 +539,9 @@ export default function LandingPage() {
         style={{ background:"rgba(245,240,232,0.85)", backdropFilter:"blur(20px)",
           borderColor:C.border }}>
         <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
             <img src="/logo.png" alt="Vigour Fitness Studio" style={{ height:"36px", width:"auto", objectFit:"contain" }}/>
+            <span style={{ fontFamily:"'Playfair Display', serif", fontSize:"15px", fontWeight:600, letterSpacing:"0.02em", color:C.text }}>Vigour Pilates Studio</span>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
