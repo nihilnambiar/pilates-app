@@ -26,50 +26,45 @@ STUDIO OVERVIEW
 ───────────────────────────────────────────────
 Name: Vigour Pilates
 Location: Pune, Maharashtra, India
-Philosophy: Small class sizes (max 12 students), expert instruction, genuine attention to every body.
+Philosophy: Small intentional classes, expert instruction, genuine attention to every body.
 Tagline: "Move with intention."
-Rating: 4.9 ★  |  500+ active members
+Rating: 4.9 ★  |  200+ active members
 
 ───────────────────────────────────────────────
 CLASSES OFFERED
 ───────────────────────────────────────────────
-1. Mat Pilates — Core strength & flexibility on the mat. All levels. 60 min.
-2. Reformer — Full-body resistance training on Balanced Body reformers. Beginner+. 60 min.
-3. Barre Fusion — Ballet-inspired sculpting & grace. All levels. 45 min.
-4. Core & Restore — Deep core work + therapeutic stretching. All levels. 75 min.
-5. Power Pilates — High-intensity challenge for those ready. Intermediate+. 60 min.
-6. Prenatal Flow — Safe, nurturing movement every trimester. All trimesters welcome. 60 min.
+1. Reformer — Full-body resistance training on Balanced Body reformers. Beginner+. 60 min.
+2. Barrel Ladder — Spinal articulation, flexibility & full-body control. All levels. 45 min.
+3. Core & Restore — Deep core work + therapeutic stretching. All levels. 75 min.
+4. Chair Pilates — High-intensity challenge using the Pilates chair. Intermediate+. 60 min.
+5. Cadillac Machine Pilates — Full-body conditioning on the Cadillac apparatus. All levels. 60 min.
 
-All classes are capped at 12 students — non-negotiable for quality instruction.
+All sessions are kept intentionally small for quality instruction.
 
 ───────────────────────────────────────────────
 INSTRUCTORS
 ───────────────────────────────────────────────
-• Diya Nambiar — Specialises in Reformer & Rehabilitation
-• Manisha Kakde — Specialises in Mat Pilates & Barre
-• Rohit Shinde — Specialises in Power Pilates & Strength
-• Kavita — Specialises in Prenatal & Restorative work
+• Diya Nambiar
+• Manisha Kakde
+• Rohit Shinde
+• Kavita
 
 ───────────────────────────────────────────────
-MEMBERSHIP PLANS
+SESSION PACKAGES
 ───────────────────────────────────────────────
-Starter — ₹2,999/month — 4 classes/month
-  Includes: Mat classes, app access, progress tracking, community
+Starter    — ₹6,000  — 8 sessions
+Essential  — ₹8,000  — 10 sessions
+Popular    — ₹10,000 — 13 sessions (Most Popular)
+Committed  — ₹15,000 — 20 sessions
+Dedicated  — ₹16,000 — 22 sessions
 
-Flow — ₹5,499/month — 8 classes/month (Most Popular)
-  Includes: Mat + reformer, priority booking, trainer notes, 1 guest pass
-
-Elite — ₹8,999/month — Unlimited classes
-  Includes: All equipment, private sessions, 2 guest passes, all workshops
-
-All plans include access to the Vigour member app for booking, leaderboard, and attendance tracking.
-Memberships can be frozen for up to 60 days per year with 3 days' notice.
+All packages include access to all apparatus and equipment.
 
 ───────────────────────────────────────────────
 TRIAL SESSION
 ───────────────────────────────────────────────
 ₹1,000 paid at the studio (no online payment required).
-Full 60-minute class with a senior instructor.
+Full 60-minute session with a senior instructor.
 Book via the "Book Trial" button on the website or the form at the bottom of the page.
 We'll confirm within 24 hours.
 
@@ -83,16 +78,10 @@ Q: What should I bring?
 A: Just comfortable workout attire. Grip socks are available to borrow at the studio.
 
 Q: How small are the classes?
-A: Every class is capped at 12 students. This is what allows instructors to truly know your body.
-
-Q: Can I freeze my membership?
-A: Yes — up to 60 days per year with 3 days' notice.
+A: We keep our sessions intentionally small. This is what allows instructors to truly know your body.
 
 Q: Is Pilates suitable for rehabilitation / injuries?
-A: Yes. Several instructors have rehabilitation expertise. Mention any injuries when booking and we'll advise on the right class.
-
-Q: Is Prenatal Flow safe throughout pregnancy?
-A: Yes, it is designed for all trimesters. Always consult your doctor, and inform your instructor before class.
+A: Yes. Several instructors have rehabilitation expertise. Mention any injuries when booking and we'll advise on the right session.
 
 ───────────────────────────────────────────────
 TONE GUIDELINES

@@ -258,34 +258,37 @@ function TestimonialCard({ t, C }) {
 }
 
 const classes = [
-  { name:"Mat Pilates",    video:"/classes/mat-pilates.mp4",    desc:"Core strength & flexibility on the mat",        level:"All levels",      dur:"60 min", badge:null },
-  { name:"Reformer",       video:"/classes/reformer.mp4",       desc:"Full-body resistance on Balanced Body reformers", level:"Beginner+",      dur:"60 min", badge:"Most Booked" },
-  { name:"Barre Fusion",   video:"/classes/barre-fusion.mp4",   desc:"Ballet-inspired sculpting & grace",             level:"All levels",      dur:"45 min", badge:null },
-  { name:"Core & Restore", video:"/classes/core-restore.mp4",   desc:"Deep core work + therapeutic stretching",       level:"All levels",      dur:"75 min", badge:null },
-  { name:"Power Pilates",  video:"/classes/power-pilates.mp4",  desc:"High-intensity challenge for those ready",      level:"Intermediate+",   dur:"60 min", badge:"Filling Fast" },
-  { name:"Prenatal Flow",  video:"/classes/prenatal-flow.mp4",  desc:"Safe, nurturing movement every trimester",      level:"All trimesters",  dur:"60 min", badge:null },
+  { name:"Reformer",                video:"/classes/reformer.mp4",       desc:"Full-body resistance on Balanced Body reformers", level:"Beginner+",      dur:"60 min", badge:"Most Booked" },
+  { name:"Barrel Ladder",           video:"/classes/barre-fusion.mp4",   desc:"Spinal articulation, flexibility & full-body control", level:"All levels", dur:"45 min", badge:null },
+  { name:"Core & Restore",          video:"/classes/core-restore.mp4",   desc:"Deep core work + therapeutic stretching",       level:"All levels",      dur:"75 min", badge:null },
+  { name:"Chair Pilates",           video:"/classes/power-pilates.mp4",  desc:"High-intensity challenge using the Pilates chair", level:"Intermediate+", dur:"60 min", badge:"Filling Fast" },
+  { name:"Cadillac Machine Pilates",video:"/classes/prenatal-flow.mp4",  desc:"Full-body conditioning on the Cadillac apparatus", level:"All levels",    dur:"60 min", badge:null },
 ];
 
 const plans = [
-  { name:"Starter", price:"₹2,999", sub:"4 classes/month", perClass:"₹750 per class",
-    features:["Mat classes","App access","Progress tracking","Community access"], highlight:false },
-  { name:"Flow",    price:"₹5,499", sub:"8 classes/month", perClass:"₹687 per class",
-    features:["Mat + reformer","Priority booking","Trainer notes","1 guest pass/mo"], highlight:true, badge:"Most Popular", social:"68% of members choose this" },
-  { name:"Elite",   price:"₹8,999", sub:"Unlimited classes", perClass:"Unlimited value",
-    features:["All equipment","Monthly private session","2 guest passes","All workshops"], highlight:false, scarcity:"Only 4 spots remaining" },
+  { name:"Starter",    price:"₹6,000",  sub:"8 sessions",  perClass:"₹750 per session",
+    features:["All apparatus","App access","Progress tracking","Community access"], highlight:false },
+  { name:"Essential",  price:"₹8,000",  sub:"10 sessions", perClass:"₹800 per session",
+    features:["All apparatus","Priority booking","Trainer notes","Community access"], highlight:false },
+  { name:"Popular",    price:"₹10,000", sub:"13 sessions", perClass:"₹769 per session",
+    features:["All apparatus","Priority booking","Trainer notes","1 guest pass"], highlight:true, badge:"Most Popular", social:"Most chosen by our members" },
+  { name:"Committed",  price:"₹15,000", sub:"20 sessions", perClass:"₹750 per session",
+    features:["All apparatus","Priority booking","Trainer notes","2 guest passes"], highlight:false },
+  { name:"Dedicated",  price:"₹16,000", sub:"22 sessions", perClass:"₹727 per session",
+    features:["All apparatus","Priority booking","Trainer notes","2 guest passes","All workshops"], highlight:false },
 ];
 
 const faqs = [
   { q:"Do I need prior Pilates experience?",
     a:"Not at all — 70% of our members joined with zero experience. Every session is personally guided. Our instructors adapt the workout to exactly where you are, and you'll feel the difference from class one." },
   { q:"What should I bring to a session?",
-    a:"Just yourself and comfortable workout attire. Grip socks are available to borrow. That's genuinely it — 500+ members started exactly the same way." },
+    a:"Just yourself and comfortable workout attire. Grip socks are available to borrow. That's genuinely it — 200+ members started exactly the same way." },
   { q:"How does the trial session work?",
     a:"Book below, pay ₹1,000 at the studio. You'll experience a full 60-minute class with a senior instructor, plus a personalised feedback note after. Over 80% of trial students convert to memberships — we think you'll understand why." },
   { q:"Can I freeze my membership?",
     a:"Yes — up to 60 days per year with 3 days' notice. We believe life happens and your membership should flex with you. Our members consistently rate our flexibility as their #1 reason for staying." },
   { q:"How small are the classes?",
-    a:"We cap every class at 12 students — non-negotiable. Recommended by 12+ physiotherapy clinics across Pune specifically because of this. Instructors know your name, your history, and your form." },
+    a:"We keep our classes intentionally small — recommended by physiotherapy clinics across Pune specifically because of this. Instructors know your name, your history, and your form." },
 ];
 
 const instructors = [
@@ -300,9 +303,9 @@ const instructors = [
 // Supported: .jpg .png .webp .mp4 .mov
 // type: "image" or "video"
 const galleryItems = [
-  { type:"image", src:"/gallery/1.jpeg", caption:"500+ Pune members transformed here",          tag:"Vigour Pilates Studio" },
-  { type:"video", src:"/gallery/1.mp4",  caption:"This could be your session next week",        tag:"Reformer · 12 students max" },
-  { type:"image", src:"/gallery/2.jpeg", caption:"The body you want is 12 sessions away",       tag:"Mat Pilates" },
+  { type:"image", src:"/gallery/1.jpeg", caption:"200+ Pune members transformed here",          tag:"Vigour Pilates Studio" },
+  { type:"video", src:"/gallery/1.mp4",  caption:"This could be your session next week",        tag:"Reformer · Vigour Pilates" },
+  { type:"image", src:"/gallery/2.jpeg", caption:"The body you want is closer than you think",  tag:"Vigour Pilates, Pune" },
   { type:"video", src:"/gallery/2.mp4",  caption:"What our members feel every morning",         tag:"At Vigour, Pune" },
   { type:"image", src:"/gallery/3.jpeg", caption:"Posture that changes how the world sees you", tag:"Mobility & Posture" },
   { type:"image", src:"/gallery/4.jpeg", caption:"Your transformation begins with one session", tag:"Book a Trial — ₹1,000" },
@@ -434,7 +437,7 @@ function GallerySection({ galleryItems, C }) {
                 fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(13px,1.1vw,15px)",
                 color: "rgba(255,255,255,0.35)", lineHeight: 1.72, maxWidth: 300,
               }}>
-                Every session at Vigour is capped at 12 students — so each body gets the attention it deserves.
+                Every session at Vigour is intentionally small — so each body gets the attention it deserves.
               </p>
             </div>
           ))}
@@ -633,7 +636,7 @@ export default function LandingPage() {
             <span className="hidden sm:inline" style={{width:"1px", height:"14px", background:"rgba(201,168,76,0.3)"}}/>
             <span className="hidden sm:inline font-body text-sm" style={{color:C.gold}}>Pune's most-loved Pilates studio</span>
             <span style={{width:"1px", height:"14px", background:"rgba(201,168,76,0.3)", display:"inline-block"}}/>
-            <span className="font-body text-sm" style={{color:"rgba(201,168,76,0.7)"}}>500+ members</span>
+            <span className="font-body text-sm" style={{color:"rgba(201,168,76,0.7)"}}>200+ members</span>
           </motion.div>
 
           <motion.h1 initial={{opacity:0,y:50}} animate={{opacity:1,y:0}} transition={{duration:1, delay:0.1}}
@@ -646,11 +649,8 @@ export default function LandingPage() {
           <motion.p initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={{duration:0.9, delay:0.25}}
             className="font-accent italic text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed"
             style={{color:"rgba(255,255,255,0.55)"}}>
-            "In 10 sessions you will feel the difference.<br className="hidden sm:block"/>
-            In 20, you will see the difference."
-            <span className="block font-body not-italic text-base mt-3" style={{color:"rgba(201,168,76,0.7)"}}>
-              — Joseph Pilates
-            </span>
+            "Your body can stand almost anything.<br className="hidden sm:block"/>
+            It's your mind you have to convince."
           </motion.p>
 
           <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.8, delay:0.4}}
@@ -685,7 +685,7 @@ export default function LandingPage() {
           <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.65}}
             className="flex flex-wrap justify-center gap-8 md:gap-16 mt-20 pt-12 border-t"
             style={{borderColor:"rgba(255,255,255,0.1)"}}>
-            {[["500+","Members"],["12","Max class size"],["4","Expert trainers"],["4.9★","Rating"]].map(([v,l])=>(
+            {[["200+","Members"],["4","Expert trainers"],["4.9★","Rating"]].map(([v,l])=>(
               <div key={l} className="text-center">
                 <p className="font-display text-3xl font-semibold" style={{color:C.gold}}>{v}</p>
                 <p className="font-body text-xs mt-1 tracking-wider uppercase" style={{color:"rgba(255,255,255,0.4)"}}>{l}</p>
@@ -721,14 +721,8 @@ export default function LandingPage() {
             color:C.white, lineHeight:1.35,
             letterSpacing:"-0.01em", marginBottom:"40px"
           }}>
-            "In 10 sessions you feel the difference. In 20, you see it. In 30, you have a whole new body."
+            "Your body can stand almost anything. It's your mind you have to convince."
           </p>
-          <div style={{width:"40px", height:"1px", background:C.gold, margin:"0 auto 24px", opacity:0.7}}/>
-          <p style={{
-            fontFamily:"'DM Sans', sans-serif", fontSize:"13px",
-            letterSpacing:"0.2em", textTransform:"uppercase",
-            color:"rgba(201,168,76,0.6)"
-          }}>— Joseph Pilates</p>
         </motion.div>
       </section>
 
@@ -740,11 +734,11 @@ export default function LandingPage() {
             <div>
               <p className="font-body text-xs tracking-widest uppercase mb-3" style={{color:C.green, letterSpacing:"0.2em"}}>What we offer</p>
               <h2 className="font-display font-semibold leading-none" style={{color:C.forest, fontSize:"clamp(3rem,7vw,5.5rem)"}}>
-                Our<br/><em style={{fontStyle:"italic", color:C.gold}}>classes</em>
+                Our<br/><em style={{fontStyle:"italic", color:C.gold}}>sessions</em>
               </h2>
             </div>
             <p className="font-accent italic text-lg max-w-xs" style={{color:C.muted, paddingBottom:"8px"}}>
-              Every class. Max 12 students.<br/>Genuine attention to every body.
+              Intentionally small classes.<br/>Genuine attention to every body.
             </p>
           </motion.div>
 
@@ -823,7 +817,7 @@ export default function LandingPage() {
             <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-full border"
               style={{borderColor:"rgba(125,184,122,0.3)", background:"rgba(125,184,122,0.06)", maxWidth:"100%"}}>
               <span style={{color:C.lime, fontSize:"12px", flexShrink:0}}>✓</span>
-              <span className="font-body text-xs md:text-sm" style={{color:"rgba(255,255,255,0.6)"}}>Internationally certified · Recommended by 12+ physio clinics in Pune</span>
+              <span className="font-body text-xs md:text-sm" style={{color:"rgba(255,255,255,0.6)"}}>Internationally certified · Recommended by physio clinics in Pune</span>
             </div>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -853,8 +847,6 @@ export default function LandingPage() {
                     background:"linear-gradient(180deg,transparent,rgba(13,13,13,0.7))"}}/>
                 </div>
                 <h3 className="font-display font-semibold text-lg mb-1" style={{color:C.white}}>{inst.name}</h3>
-                <p className="font-body text-sm mb-1" style={{color:"rgba(201,168,76,0.7)"}}>{inst.spec}</p>
-                <p className="font-body text-xs" style={{color:"rgba(255,255,255,0.3)"}}>{inst.years} · {inst.cert}</p>
               </motion.div>
             ))}
           </div>
@@ -879,7 +871,7 @@ export default function LandingPage() {
               <span className="font-body text-sm ml-2" style={{color:"rgba(255,255,255,0.5)"}}>4.9 · 200+ reviews</span>
             </div>
             <span className="font-body text-xs px-3 py-1.5 rounded-full border" style={{borderColor:"rgba(125,184,122,0.3)", color:C.lime, whiteSpace:"nowrap"}}>
-              ✓ Join 500+ Pune members
+              ✓ Join 200+ Pune members
             </span>
           </div>
         </motion.div>
@@ -1040,7 +1032,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap justify-center gap-3 mt-6">
               {[
                 [Clock, "60 minutes"],
-                [Users, "Max 12 students"],
+                [Users, "Small group sessions"],
                 [MapPin, "Pune studio"],
               ].map(([Icon,text])=>(
                 <div key={text} className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-body"

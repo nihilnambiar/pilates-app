@@ -515,11 +515,6 @@ export default function PilatesQuiz() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} className="mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-4"
-            style={{borderColor:"rgba(201,168,76,0.3)", background:"rgba(201,168,76,0.07)"}}>
-            <span style={{color:C.gold, fontSize:"12px"}}>✦</span>
-            <span className="font-body text-xs" style={{color:"rgba(201,168,76,0.8)"}}>Free — ₹2,000 value · No signup required</span>
-          </div>
           <p className="font-body text-xs tracking-widest uppercase mb-3"
             style={{ color: "rgba(201,168,76,0.7)", letterSpacing: "0.2em" }}>Personalised for you</p>
           <h2 className="font-display font-semibold leading-none"
@@ -530,7 +525,7 @@ export default function PilatesQuiz() {
             15 questions · 3 minutes · AI-powered analysis sent to your inbox
           </p>
           <p className="font-body text-xs mt-2" style={{color:"rgba(125,184,122,0.6)"}}>
-            ✓ Taken by 850+ Vigour members · Results include personalised class recommendation + 30-day plan
+            ✓ Taken by 200+ Vigour members · Results include personalised class recommendation + 30-day plan
           </p>
         </motion.div>
 
