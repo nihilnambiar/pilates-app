@@ -303,12 +303,12 @@ const instructors = [
 // Supported: .jpg .png .webp .mp4 .mov
 // type: "image" or "video"
 const galleryItems = [
-  { type:"image", src:"/gallery/1.jpeg", caption:"200+ Pune members transformed here",          tag:"Vigour Pilates Studio" },
-  { type:"video", src:"/gallery/1.mp4",  caption:"This could be your session next week",        tag:"Reformer · Vigour Pilates" },
-  { type:"image", src:"/gallery/2.jpeg", caption:"The body you want is closer than you think",  tag:"Vigour Pilates, Pune" },
-  { type:"video", src:"/gallery/2.mp4",  caption:"What our members feel every morning",         tag:"At Vigour, Pune" },
-  { type:"image", src:"/gallery/3.jpeg", caption:"Posture that changes how the world sees you", tag:"Mobility & Posture" },
-  { type:"image", src:"/gallery/4.jpeg", caption:"Your transformation begins with one session", tag:"Book a Trial — ₹1,000" },
+  { type:"image", src:"/gallery/1.jpeg", caption:"200+ Pune members transformed here",          tag:"Vigour Pilates Studio",  body:"Real people, real results. Every member who walks through our doors leaves a little stronger, a little taller, and a lot more confident." },
+  { type:"video", src:"/gallery/1.mp4",  caption:"This could be your session next week",        tag:"Reformer · Vigour Pilates", body:"Your first session is just one click away. Book a trial for ₹1,000 and experience what intentional movement feels like." },
+  { type:"image", src:"/gallery/2.jpeg", caption:"The body you want is closer than you think",  tag:"Vigour Pilates, Pune",   body:"Consistency is the only secret. Show up, move well, and your body will follow. Our instructors make sure every session counts." },
+  { type:"video", src:"/gallery/2.mp4",  caption:"What our members feel every morning",         tag:"At Vigour, Pune",        body:"Energy, clarity, and a body that moves without pain. That's what Vigour members wake up to — and it starts from session one." },
+  { type:"image", src:"/gallery/3.jpeg", caption:"Posture that changes how the world sees you", tag:"Mobility & Posture",     body:"The way you carry yourself speaks before you do. Pilates rebuilds the foundations — spine, core, alignment — so you stand differently." },
+  { type:"image", src:"/gallery/4.jpeg", caption:"Your transformation begins with one session", tag:"Book a Trial — ₹1,000",  body:"One hour. One decision. That's all it takes to start. Book your trial session today and see exactly what Vigour can do for your body." },
 ];
 
 // ─── Gallery Section ──────────────────────────────────────────
@@ -437,7 +437,7 @@ function GallerySection({ galleryItems, C }) {
                 fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(13px,1.1vw,15px)",
                 color: "rgba(255,255,255,0.35)", lineHeight: 1.72, maxWidth: 300,
               }}>
-                Every session at Vigour is intentionally small — so each body gets the attention it deserves.
+                {item.body}
               </p>
             </div>
           ))}
