@@ -539,13 +539,8 @@ export default function LandingPage() {
         style={{ background:"rgba(245,240,232,0.85)", backdropFilter:"blur(20px)",
           borderColor:C.border }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center font-display font-semibold text-white text-sm"
-              style={{ background:C.forest }}>V</div>
-            <div>
-              <span className="font-display text-xl font-semibold" style={{color:C.forest}}>Vigour</span>
-              <span className="hidden sm:inline font-body text-xs ml-2 tracking-widest uppercase" style={{color:C.muted}}>Pilates, Pune</span>
-            </div>
+          <div className="flex items-center">
+            <img src="/logo.png" alt="Vigour Fitness Studio" style={{ height:"52px", width:"auto", objectFit:"contain" }}/>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
@@ -1168,10 +1163,8 @@ export default function LandingPage() {
       <footer style={{background:C.black, borderTop:`1px solid rgba(255,255,255,0.06)`}}>
         <div className="max-w-7xl mx-auto px-6 py-14 flex flex-col md:flex-row justify-between gap-10">
           <div className="max-w-xs">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center font-display font-semibold text-sm"
-                style={{background:C.forest, color:C.gold}}>V</div>
-              <span className="font-display text-xl font-semibold" style={{color:C.white}}>Vigour</span>
+            <div className="flex items-center mb-4">
+              <img src="/logo.png" alt="Vigour Fitness Studio" style={{ height:"48px", width:"auto", objectFit:"contain", filter:"brightness(0) invert(1)" }}/>
             </div>
             <p className="font-body text-sm leading-relaxed" style={{color:"rgba(255,255,255,0.35)"}}>
               Pune's most intimate premium Pilates studio. Precision, intention, transformation.
