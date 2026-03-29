@@ -538,7 +538,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b"
         style={{ background:"rgba(245,240,232,0.45)", backdropFilter:"blur(16px)",
           borderColor:C.border }}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
           <div className="flex items-center">
             <img src="/logo.png" alt="Vigour Fitness Studio" style={{ height:"52px", width:"auto", objectFit:"contain" }}/>
           </div>
