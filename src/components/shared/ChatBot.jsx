@@ -54,9 +54,9 @@ SESSION PACKAGES
 ───────────────────────────────────────────────
 Starter    — ₹6,000  — 8 sessions
 Essential  — ₹8,000  — 10 sessions
-Popular    — ₹10,000 — 13 sessions (Most Popular)
+Popular    — ₹10,000 — 13 sessions
 Committed  — ₹15,000 — 20 sessions
-Dedicated  — ₹16,000 — 22 sessions
+Dedicated  — ₹16,000 — 22 sessions (Most Popular)
 
 All packages include access to all apparatus and equipment.
 

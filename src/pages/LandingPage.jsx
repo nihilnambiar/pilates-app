@@ -271,11 +271,11 @@ const plans = [
   { name:"Essential",  price:"₹8,000",  sub:"10 sessions", perClass:"₹800 per session",
     features:["All apparatus","Priority booking","Trainer notes","Community access"], highlight:false },
   { name:"Popular",    price:"₹10,000", sub:"13 sessions", perClass:"₹769 per session",
-    features:["All apparatus","Priority booking","Trainer notes","1 guest pass"], highlight:true, badge:"Most Popular", social:"Most chosen by our members" },
+    features:["All apparatus","Priority booking","Trainer notes","1 guest pass"], highlight:false },
   { name:"Committed",  price:"₹15,000", sub:"20 sessions", perClass:"₹750 per session",
     features:["All apparatus","Priority booking","Trainer notes","2 guest passes"], highlight:false },
   { name:"Dedicated",  price:"₹16,000", sub:"22 sessions", perClass:"₹727 per session",
-    features:["All apparatus","Priority booking","Trainer notes","2 guest passes","All workshops"], highlight:false },
+    features:["All apparatus","Priority booking","Trainer notes","2 guest passes","All workshops"], highlight:true, badge:"Most Popular", social:"Most chosen by our members" },
 ];
 
 const faqs = [
