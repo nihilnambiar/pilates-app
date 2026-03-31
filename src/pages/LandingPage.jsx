@@ -1129,11 +1129,11 @@ export default function LandingPage() {
                     <p className="font-body font-semibold text-sm mb-3" style={{color:C.forest}}>Studio Hours</p>
                     <div className="space-y-1.5">
                       {[
-                        ["Mon – Fri", "6:00 AM – 9:00 PM"],
-                        ["Saturday",  "7:00 AM – 6:00 PM"],
+                        ["Mon – Sat", "8:00 AM – 1:00 PM"],
+                        ["Mon – Sat", "5:00 PM – 8:00 PM"],
                         ["Sunday",    "Closed"],
-                      ].map(([day,hrs])=>(
-                        <div key={day} className="flex justify-between font-body text-sm">
+                      ].map(([day,hrs],i)=>(
+                        <div key={i} className="flex justify-between font-body text-sm">
                           <span style={{color:C.muted}}>{day}</span>
                           <span style={{color: day==="Sunday" ? "#e24b4a" : C.forest, fontWeight:"500"}}>{hrs}</span>
                         </div>
