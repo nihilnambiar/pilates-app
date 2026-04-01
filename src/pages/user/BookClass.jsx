@@ -1,9 +1,9 @@
 // src/pages/user/BookClass.jsx
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Users, Clock, User, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, Clock, User, CheckCircle, XCircle, BellPlus, BellOff } from 'lucide-react';
 import { format, addDays, startOfToday } from 'date-fns';
-import { getSlots, bookSlot, getUserBookings, cancelBooking } from '../../services/slotService';
+import { getSlots, bookSlot, getUserBookings, cancelBooking, joinWaitlist, leaveWaitlist, getWaitlistPosition } from '../../services/slotService';
 import { useAuth } from '../../context/AuthContext';
 import { formatTime, isSlotPast } from '../../utils/helpers';
 import { SlotSkeleton } from '../../components/shared/Skeletons';
@@ -62,6 +62,34 @@ export default function BookClass() {
     } finally {
       setActionLoading(null);
       setConfirm(null);
+    }
+  };
+
+  const handleJoinWaitlist = async (slot) => {
+    setActionLoading(slot.id);
+    try {
+      const position = await joinWaitlist(currentUser.uid, slot.id, {
+        name: currentUser.displayName, email: currentUser.email, phone: currentUser.phoneNumber,
+      });
+      toast.success(`Added to waitlist — you are #${position} 🔔`);
+      await loadSlots(selectedDate);
+    } catch (e) {
+      toast.error(e.message || 'Failed to join waitlist');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleLeaveWaitlist = async (slot) => {
+    setActionLoading(slot.id);
+    try {
+      await leaveWaitlist(currentUser.uid, slot.id);
+      toast.success('Removed from waitlist');
+      await loadSlots(selectedDate);
+    } catch (e) {
+      toast.error(e.message || 'Failed to leave waitlist');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -248,16 +276,43 @@ export default function BookClass() {
                       <XCircle size={15} />
                       Cancel Booking
                     </button>
-                  ) : (
+                  ) : isFull ? (() => {
+                    const position = getWaitlistPosition(slot, currentUser.uid);
+                    return position ? (
+                      <div className="space-y-2">
+                        <p className="font-body text-xs text-amber-600 font-medium text-center">
+                          🔔 You are #{position} on the waitlist
+                        </p>
+                        <button
+                          onClick={() => handleLeaveWaitlist(slot)}
+                          disabled={actionLoading === slot.id}
+                          className="btn-secondary w-full text-sm flex items-center justify-center gap-2 text-amber-600 border-amber-200 hover:bg-amber-50"
+                        >
+                          <BellOff size={15} />
+                          Leave Waitlist
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="font-body text-xs text-[#8a7b76] text-center">Class is full</p>
+                        <button
+                          onClick={() => handleJoinWaitlist(slot)}
+                          disabled={!!actionLoading}
+                          className="btn-secondary w-full text-sm flex items-center justify-center gap-2 text-amber-600 border-amber-200 hover:bg-amber-50"
+                        >
+                          <BellPlus size={15} />
+                          Join Waitlist
+                        </button>
+                      </div>
+                    );
+                  })() : (
                     <button
-                      onClick={() => !isFull && setConfirm({ type: 'book', slot })}
-                      disabled={isFull || !!actionLoading}
-                      className={`w-full text-sm flex items-center justify-center gap-2 ${
-                        isFull ? 'btn-secondary opacity-50 cursor-not-allowed' : 'btn-primary'
-                      }`}
+                      onClick={() => setConfirm({ type: 'book', slot })}
+                      disabled={!!actionLoading}
+                      className="btn-primary w-full text-sm flex items-center justify-center gap-2"
                     >
                       <CheckCircle size={15} />
-                      {isFull ? 'Class Full' : 'Reserve Spot'}
+                      Reserve Spot
                     </button>
                   )}
                 </motion.div>

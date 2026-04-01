@@ -6,6 +6,8 @@ import { Toaster } from 'react-hot-toast';
 
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
+import ReviewPage from './pages/ReviewPage';
+import TestimonialsAdmin from './pages/admin/TestimonialsAdmin';
 import Dashboard from './pages/user/Dashboard';
 import BookClass from './pages/user/BookClass';
 import Attendance from './pages/user/Attendance';
@@ -48,6 +50,9 @@ export default function App() {
         {/* Landing page — public home */}
         <Route path="/" element={<LandingPage />} />
 
+        {/* Review page — public, no auth required */}
+        <Route path="/review" element={<ReviewPage />} />
+
         {/* Auth */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<AuthPage />} />
@@ -73,6 +78,7 @@ export default function App() {
             <Route path="/admin/attendance" element={<AttendanceManagement />} />
             <Route path="/admin/bookings" element={<BookingsView />} />
             <Route path="/admin/announcements" element={<Announcements />} />
+            <Route path="/admin/testimonials" element={<TestimonialsAdmin />} />
           </Route>
         </Route>
 

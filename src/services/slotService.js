@@ -114,6 +114,49 @@ export const bookSlot = async (userId, slotId) => {
   });
 };
 
+// ─── Waitlist ───────────────────────────────────────────────────
+
+export const joinWaitlist = async (userId, slotId, userProfile) => {
+  const slotRef = doc(db, 'slots', slotId);
+  return await runTransaction(db, async (tx) => {
+    const slotSnap = await tx.get(slotRef);
+    if (!slotSnap.exists()) throw new Error('Slot not found');
+    const slot = slotSnap.data();
+
+    // Confirm class is actually full
+    if (slot.bookedCount < slot.capacity) throw new Error('Class still has open spots — book directly');
+
+    const waitlist = slot.waitlist || [];
+    if (waitlist.some(e => e.userId === userId)) throw new Error('You are already on the waitlist');
+
+    const entry = {
+      userId,
+      userName:  userProfile?.name  || '',
+      userEmail: userProfile?.email || '',
+      userPhone: userProfile?.phone || '',
+      timestamp: new Date().toISOString(),
+    };
+    tx.update(slotRef, { waitlist: [...waitlist, entry] });
+    return waitlist.length + 1; // return position (1-based)
+  });
+};
+
+export const leaveWaitlist = async (userId, slotId) => {
+  const slotRef = doc(db, 'slots', slotId);
+  return await runTransaction(db, async (tx) => {
+    const slotSnap = await tx.get(slotRef);
+    if (!slotSnap.exists()) throw new Error('Slot not found');
+    const waitlist = slotSnap.data().waitlist || [];
+    tx.update(slotRef, { waitlist: waitlist.filter(e => e.userId !== userId) });
+  });
+};
+
+export const getWaitlistPosition = (slot, userId) => {
+  const waitlist = slot?.waitlist || [];
+  const idx = waitlist.findIndex(e => e.userId === userId);
+  return idx === -1 ? null : idx + 1; // 1-based position, or null if not on list
+};
+
 export const cancelBooking = async (bookingId, slotId) => {
   const bookingRef = doc(db, 'bookings', bookingId);
   const slotRef = doc(db, 'slots', slotId);

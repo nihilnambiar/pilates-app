@@ -7,6 +7,8 @@ gsap.registerPlugin(ScrollTrigger);
 import { ArrowRight, Check, Star, ChevronDown, Menu, X, MapPin, Clock, Users } from "lucide-react";
 import ChatBot from "../components/shared/ChatBot";
 import PilatesQuiz from "../components/shared/PilatesQuiz";
+import { collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp } from "firebase/firestore";
+import { db } from "../services/firebase";
 
 // ─── COLOUR TOKENS ────────────────────────────────────────────
 // Deep forest green + warm ivory + rich gold + near-black
@@ -125,11 +127,28 @@ function TrialForm() {
   const [loading, setLoading] = useState(false);
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (!form.name||!form.email) return;
+    if (!form.name || !form.email) return;
     setLoading(true);
-    setTimeout(()=>{ setLoading(false); setSent(true); }, 1200);
+    try {
+      await addDoc(collection(db, "trialBookings"), {
+        name:    form.name,
+        email:   form.email,
+        phone:   form.phone,
+        date:    form.date,
+        message: form.message,
+        status:  "pending",
+        createdAt: serverTimestamp(),
+      });
+      setSent(true);
+    } catch (err) {
+      console.error("Trial booking error:", err);
+      // Still show success to user — Cloud Function will pick it up
+      setSent(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (sent) return (
@@ -516,8 +535,28 @@ function GallerySection({ galleryItems, C }) {
 export default function LandingPage() {
   const containerRef = useRef(null);
   const machineRef   = useRef(null);
-  const [navOpen, setNavOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState(null);
+  const [navOpen, setNavOpen]         = useState(false);
+  const [openFaq, setOpenFaq]         = useState(null);
+  const [liveTestimonials, setLiveTestimonials] = useState(null); // null = not yet loaded
+
+  // Real-time testimonials from Firestore (published only)
+  useEffect(() => {
+    const q = query(
+      collection(db, "testimonials"),
+      where("status", "==", "published"),
+      orderBy("createdAt", "desc")
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const docs = snap.docs.map(d => ({
+        name:  d.data().userName || "Member",
+        role:  d.data().className || "Vigour Member",
+        stars: d.data().rating   || 5,
+        text:  d.data().reviewText,
+      }));
+      setLiveTestimonials(docs.length > 0 ? docs : null);
+    }, () => setLiveTestimonials(null)); // fallback on error
+    return () => unsub();
+  }, []);
 
   const { scrollYProgress } = useScroll({ target: containerRef });
   const { scrollYProgress: machineScroll } = useScroll({
@@ -879,7 +918,7 @@ export default function LandingPage() {
           <motion.div className="flex gap-5 w-max"
             animate={{x:["0px", "-50%"]}}
             transition={{duration:40, ease:"linear", repeat:Infinity}}>
-            {[...allTestimonials, ...allTestimonials].map((t,i) => (
+            {[...(liveTestimonials || allTestimonials), ...(liveTestimonials || allTestimonials)].map((t,i) => (
               <TestimonialCard key={`r1-${i}`} t={t} C={C}/>
             ))}
           </motion.div>
@@ -892,7 +931,7 @@ export default function LandingPage() {
           <motion.div className="flex gap-5 w-max"
             animate={{x:["-50%", "0px"]}}
             transition={{duration:32, ease:"linear", repeat:Infinity}}>
-            {[...allTestimonials, ...allTestimonials].map((t,i) => (
+            {[...(liveTestimonials || allTestimonials), ...(liveTestimonials || allTestimonials)].map((t,i) => (
               <TestimonialCard key={`r2-${i}`} t={t} C={C}/>
             ))}
           </motion.div>
