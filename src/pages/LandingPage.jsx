@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 import { ArrowRight, Check, Star, ChevronDown, Menu, X, MapPin, Clock, Users } from "lucide-react";
 import ChatBot from "../components/shared/ChatBot";
 import PilatesQuiz from "../components/shared/PilatesQuiz";
+import Iridescence from "../components/shared/Iridescence";
 import { collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
 
@@ -633,23 +634,16 @@ export default function LandingPage() {
 
       {/* ── HERO ─────────────────────────────────── */}
       <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden"
-        style={{ background:`linear-gradient(160deg, ${C.forest} 0%, #0d1f10 50%, ${C.black} 100%)` }}>
+        style={{ background: C.black }}>
 
-        {/* Grain texture overlay */}
-        <div className="absolute inset-0 pointer-events-none opacity-30"
-          style={{ backgroundImage:"url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E\")" }}/>
+        {/* Iridescence background */}
+        <div className="absolute inset-0" style={{ pointerEvents:"none" }}>
+          <Iridescence color={[0.5, 0.6, 0.8]} mouseReact amplitude={0.1} speed={1} />
+        </div>
 
-        {/* Ambient orbs */}
-        <div className="absolute pointer-events-none" style={{
-          width:"700px", height:"700px", borderRadius:"50%",
-          background:"radial-gradient(circle, rgba(45,90,52,0.35) 0%, transparent 70%)",
-          top:"-200px", left:"-150px", filter:"blur(80px)"
-        }}/>
-        <div className="absolute pointer-events-none" style={{
-          width:"500px", height:"500px", borderRadius:"50%",
-          background:"radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%)",
-          bottom:"0px", right:"-100px", filter:"blur(60px)"
-        }}/>
+        {/* Dark overlay so text stays readable */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background:"rgba(0,0,0,0.45)" }}/>
 
         {/* Gold accent line */}
         <div className="absolute top-0 left-0 right-0 h-px" style={{background:`linear-gradient(90deg, transparent, ${C.gold}, transparent)`}}/>
