@@ -314,7 +314,6 @@ const instructors = [
   { name:"Diya Nambiar",  spec:"Reformer & Rehabilitation", photo:"/instructors/diya.jpg",  years:"8 yrs experience", cert:"STOTT Pilates Certified" },
   { name:"Manisha Kakde", spec:"Mat Pilates & Barre",       photo:"/instructors/manisha.jpg", years:"6 yrs experience", cert:"Peak Pilates Certified" },
   { name:"Rohit Shinde",  spec:"Power Pilates & Strength",  photo:"/instructors/rohit.jpg",  years:"5 yrs experience", cert:"BASI Certified" },
-  { name:"Kavita",        spec:"Prenatal & Restorative",    photo:"/instructors/kavita.jpg", years:"7 yrs experience", cert:"Pre/Postnatal Specialist" },
 ];
 
 // ─── Gallery items ────────────────────────────────────────────
@@ -845,9 +844,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto" style={{position:"relative"}}>
           <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}}
             viewport={{once:true}} className="mb-14">
-            <p className="font-body text-xs tracking-widest uppercase mb-3" style={{color:C.gold, letterSpacing:"0.2em"}}>The team</p>
+            <p className="font-body text-xs tracking-widest uppercase mb-3" style={{color:C.gold, letterSpacing:"0.2em"}}>The visionaries</p>
             <h2 className="font-display font-semibold leading-none mb-6" style={{color:C.white, fontSize:"clamp(3rem,7vw,5.5rem)"}}>
-              Meet your<br/><em style={{fontStyle:"italic", color:C.lime}}>instructors</em>
+              Meet the<br/><em style={{fontStyle:"italic", color:C.lime}}>architects</em>
             </h2>
             <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-full border"
               style={{borderColor:"rgba(125,184,122,0.3)", background:"rgba(125,184,122,0.06)", maxWidth:"100%"}}>
