@@ -656,10 +656,11 @@ export default function LandingPage() {
         ))}
 
         <motion.div style={{y:heroY, opacity:heroOpacity}}
-          className="relative z-10 text-center px-6 max-w-5xl mx-auto">
+          className="relative z-10 w-full flex flex-col items-center text-center">
 
+          {/* Badge */}
           <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.8}}
-            className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-full mb-8 border"
+            className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-full mb-6 border"
             style={{borderColor:`rgba(201,168,76,0.4)`, background:`rgba(201,168,76,0.08)`}}>
             <span className="font-body text-sm" style={{color:C.gold}}>⭐ 4.9/5</span>
             <span className="hidden sm:inline" style={{width:"1px", height:"14px", background:"rgba(201,168,76,0.3)"}}/>
@@ -668,8 +669,9 @@ export default function LandingPage() {
             <span className="font-body text-sm" style={{color:"rgba(201,168,76,0.7)"}}>200+ members</span>
           </motion.div>
 
-          <motion.div initial={{opacity:0,y:50}} animate={{opacity:1,y:0}} transition={{duration:1, delay:0.1}}
-            style={{position:"relative", height:"clamp(80px,14vw,160px)", width:"100%", marginBottom:"2rem"}}>
+          {/* TextPressure — full viewport width */}
+          <motion.div initial={{opacity:0,y:40}} animate={{opacity:1,y:0}} transition={{duration:1, delay:0.1}}
+            style={{position:"relative", height:"clamp(60px,10vw,130px)", width:"100%", padding:"0 2vw", marginBottom:"2rem"}}>
             <TextPressure
               text="Move with intention."
               flex
@@ -684,19 +686,20 @@ export default function LandingPage() {
             />
           </motion.div>
 
+          {/* Quote */}
           <motion.p initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={{duration:0.9, delay:0.25}}
-            className="font-accent italic text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed"
+            className="font-accent italic text-xl md:text-2xl mb-10 max-w-2xl leading-relaxed px-6"
             style={{color:"rgba(255,255,255,0.55)"}}>
             "Your body can stand almost anything.<br className="hidden sm:block"/>
             It's your mind you have to convince."
           </motion.p>
 
+          {/* CTAs */}
           <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.8, delay:0.4}}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
             <a href="#trial"
               className="flex items-center gap-2 font-body font-semibold px-8 py-4 rounded-2xl transition-all duration-300"
-              style={{background:C.gold, color:C.black, boxShadow:`0 12px 40px rgba(201,168,76,0.4)`,
-                fontSize:"15px"}}>
+              style={{background:C.gold, color:C.black, boxShadow:`0 12px 40px rgba(201,168,76,0.4)`, fontSize:"15px"}}>
               Book Trial Session <ArrowRight size={18}/>
             </a>
             <a href="#quiz"
@@ -706,8 +709,9 @@ export default function LandingPage() {
             </a>
           </motion.div>
 
+          {/* Social proof pills */}
           <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.6}}
-            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-6">
+            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-5 px-6">
             <span className="font-body text-xs flex items-center gap-1.5" style={{color:"rgba(255,255,255,0.35)"}}>
               <span style={{color:C.lime, fontSize:"10px"}}>●</span> 127 trials booked this month
             </span>
@@ -721,7 +725,7 @@ export default function LandingPage() {
 
           {/* Stats bar */}
           <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.65}}
-            className="flex flex-wrap justify-center gap-8 md:gap-16 mt-20 pt-12 border-t"
+            className="flex flex-wrap justify-center gap-8 md:gap-16 mt-10 pt-8 border-t w-full px-6 max-w-2xl"
             style={{borderColor:"rgba(255,255,255,0.1)"}}>
             {[["200+","Members"],["4","Expert trainers"],["4.9★","Rating"]].map(([v,l])=>(
               <div key={l} className="text-center">
@@ -731,7 +735,7 @@ export default function LandingPage() {
             ))}
           </motion.div>
 
-          <motion.div className="mt-14" animate={{y:[0,8,0]}} transition={{duration:2,repeat:Infinity}}>
+          <motion.div className="mt-8" animate={{y:[0,8,0]}} transition={{duration:2,repeat:Infinity}}>
             <ChevronDown size={28} className="mx-auto" style={{color:"rgba(201,168,76,0.5)"}}/>
           </motion.div>
         </motion.div>
