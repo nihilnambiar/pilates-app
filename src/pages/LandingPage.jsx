@@ -8,6 +8,7 @@ import { ArrowRight, Check, Star, ChevronDown, Menu, X, MapPin, Clock, Users } f
 import ChatBot from "../components/shared/ChatBot";
 import PilatesQuiz from "../components/shared/PilatesQuiz";
 import Iridescence from "../components/shared/Iridescence";
+import TextPressure from "../components/shared/TextPressure";
 import { collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
 
@@ -667,12 +668,21 @@ export default function LandingPage() {
             <span className="font-body text-sm" style={{color:"rgba(201,168,76,0.7)"}}>200+ members</span>
           </motion.div>
 
-          <motion.h1 initial={{opacity:0,y:50}} animate={{opacity:1,y:0}} transition={{duration:1, delay:0.1}}
-            className="font-display font-semibold leading-none mb-8"
-            style={{fontSize:"clamp(2.8rem,9vw,8rem)", color:C.white}}>
-            Move with<br/>
-            <em style={{color:C.gold, fontStyle:"italic"}}>intention.</em>
-          </motion.h1>
+          <motion.div initial={{opacity:0,y:50}} animate={{opacity:1,y:0}} transition={{duration:1, delay:0.1}}
+            style={{position:"relative", height:"clamp(80px,14vw,160px)", width:"100%", marginBottom:"2rem"}}>
+            <TextPressure
+              text="Move with intention."
+              flex
+              alpha={false}
+              stroke={false}
+              width
+              weight
+              italic
+              textColor="#ffffff"
+              strokeColor={C.gold}
+              minFontSize={28}
+            />
+          </motion.div>
 
           <motion.p initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={{duration:0.9, delay:0.25}}
             className="font-accent italic text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed"
