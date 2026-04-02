@@ -380,7 +380,7 @@ function GallerySection({ galleryItems, C }) {
   }, [n]);
 
   return (
-    <section ref={containerRef} style={{ background: "#080808" }}>
+    <section ref={containerRef} style={{ background: "#0d0d0d" }}>
       {/* 100vh inner — GSAP pins this whole section, no CSS sticky needed */}
       <div style={{
         height: "100vh", display: "flex", alignItems: "stretch", overflow: "hidden",
@@ -638,7 +638,7 @@ export default function LandingPage() {
 
         {/* Iridescence background */}
         <div className="absolute inset-0" style={{ pointerEvents:"none" }}>
-          <Iridescence color={[0.5, 0.6, 0.8]} mouseReact amplitude={0.1} speed={1} />
+          <Iridescence color={[0.18, 0.38, 0.22]} mouseReact amplitude={0.12} speed={0.8} />
         </div>
 
         {/* Dark overlay so text stays readable */}
@@ -856,7 +856,7 @@ export default function LandingPage() {
                 style={{cursor:"default"}}>
                 {/* Photo circle / placeholder */}
                 <div className="relative mb-5 overflow-hidden rounded-3xl"
-                  style={{aspectRatio:"3/4", background:`linear-gradient(160deg, #1e3a22 0%, #0d1f10 100%)`,
+                  style={{aspectRatio:"3/4", background:`linear-gradient(160deg, #181818 0%, #0a0a0a 100%)`,
                     border:`1px solid rgba(201,168,76,0.1)`}}>
                   <img src={inst.photo} alt={inst.name}
                     style={{width:"100%", height:"100%", objectFit:"cover", objectPosition:"center top",
@@ -883,7 +883,7 @@ export default function LandingPage() {
 
       {/* ── TESTIMONIALS — dual infinite marquee ── */}
       <section id="testimonials" className="py-28 overflow-hidden"
-        style={{background:`linear-gradient(135deg, ${C.forest} 0%, #152319 100%)`}}>
+        style={{background:"#0d0d0d"}}>
 
         <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}}
           viewport={{once:true}} className="px-6 max-w-7xl mx-auto mb-14">
@@ -932,7 +932,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ──────────────────────────────── */}
-      <section id="pricing" className="py-28 px-6" style={{background:"#0a0f0b", position:"relative", overflow:"hidden"}}>
+      <section id="pricing" className="py-28 px-6" style={{background:"#0d0d0d", position:"relative", overflow:"hidden"}}>
         <div className="max-w-7xl mx-auto">
           <div className="absolute inset-0 pointer-events-none" style={{
             background:"radial-gradient(ellipse 60% 60% at 70% 40%, rgba(45,90,52,0.12) 0%, transparent 70%)"
@@ -1005,7 +1005,7 @@ export default function LandingPage() {
       <PilatesQuiz />
 
       {/* ── FAQ ──────────────────────────────────── */}
-      <section id="faq" className="py-28 px-6" style={{background:"#050a06"}}>
+      <section id="faq" className="py-28 px-6" style={{background:"#0d0d0d"}}>
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}}
             viewport={{once:true}} className="mb-16">
@@ -1041,7 +1041,7 @@ export default function LandingPage() {
 
       {/* ── TRIAL BOOKING ────────────────────────── */}
       <section id="trial" className="py-28 px-6"
-        style={{background:`linear-gradient(160deg, #0d1f10 0%, ${C.forest} 100%)`}}>
+        style={{background:"#0d0d0d"}}>
         <div className="max-w-2xl mx-auto">
           <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}}
             viewport={{once:true}} className="text-center mb-12">
