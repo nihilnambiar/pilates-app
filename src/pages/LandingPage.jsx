@@ -9,6 +9,7 @@ import ChatBot from "../components/shared/ChatBot";
 import PilatesQuiz from "../components/shared/PilatesQuiz";
 import Iridescence from "../components/shared/Iridescence";
 import TextPressure from "../components/shared/TextPressure";
+import BorderGlow from "../components/shared/BorderGlow";
 import { collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
 
@@ -965,19 +966,25 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((p,i)=>(
               <motion.div key={p.name} initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}}
-                viewport={{once:true}} transition={{delay:i*0.1}}
-                className="relative p-8 rounded-3xl border"
-                style={{
-                  background: p.highlight ? C.forest : "rgba(255,255,255,0.04)",
-                  borderColor: p.highlight ? C.gold : "rgba(255,255,255,0.08)",
-                  boxShadow: p.highlight ? `0 20px 60px rgba(26,46,30,0.25), 0 0 0 1px ${C.gold}` : "none"
-                }}>
+                viewport={{once:true}} transition={{delay:i*0.1}} className="relative">
                 {p.badge && (
-                  <div className="absolute -top-3.5 left-8">
+                  <div className="absolute -top-3.5 left-8 z-10">
                     <span className="text-xs font-body font-semibold px-4 py-1.5 rounded-full"
                       style={{background:C.gold, color:C.black}}>{p.badge}</span>
                   </div>
                 )}
+                <BorderGlow
+                  backgroundColor={p.highlight ? "#1a2e1e" : "#111111"}
+                  borderRadius={24}
+                  glowColor={p.highlight ? "45 65 52" : "0 0 70"}
+                  colors={p.highlight ? ['#c9a84c','#7db87a','#f5d688'] : ['#444444','#c9a84c','#7db87a']}
+                  glowRadius={40}
+                  glowIntensity={p.highlight ? 1.2 : 0.7}
+                  edgeSensitivity={25}
+                  coneSpread={30}
+                  fillOpacity={0.4}
+                  className="w-full">
+                <div className="p-8">
                 <h3 className="font-display text-2xl font-semibold mb-1"
                   style={{color: p.highlight ? C.white : "rgba(255,255,255,0.9)"}}>{p.name}</h3>
                 <p className="font-body text-sm mb-4" style={{color: p.highlight ? C.lime : "rgba(255,255,255,0.4)"}}>{p.sub}</p>
@@ -1009,6 +1016,8 @@ export default function LandingPage() {
                     : {background:"transparent", color:"rgba(255,255,255,0.8)", border:"1.5px solid rgba(255,255,255,0.2)"}}>
                   Get Started
                 </a>
+                </div>
+                </BorderGlow>
               </motion.div>
             ))}
           </div>
