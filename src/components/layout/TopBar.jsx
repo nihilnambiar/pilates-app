@@ -43,7 +43,7 @@ export default function TopBar({ onMenuToggle, title }) {
       </button>
 
       <div className="flex-1">
-        <h1 className="font-display text-lg font-semibold text-blush-700">Vigour</h1>
+        <img src="/logop.png" alt="Vigour Pilates Studio" style={{ height: '28px', width: 'auto', objectFit: 'contain' }} />
       </div>
 
       <div className="relative" ref={menuRef}>

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Megaphone } from 'lucide-react';
-import { createAnnouncement, getAnnouncements, deleteAnnouncement } from '../../services/slotService';
+import { createAnnouncement, getAnnouncements, deleteAnnouncement, getAllUsers } from '../../services/slotService';
 import { ConfirmModal } from '../../components/shared/Modal';
 import { formatTimestamp } from '../../utils/helpers';
 import EmptyState from '../../components/shared/EmptyState';
@@ -38,7 +38,25 @@ export default function Announcements() {
     setSaving(true);
     try {
       await createAnnouncement(form);
-      toast.success('Announcement posted!');
+
+      // Send email to all members
+      const users = await getAllUsers();
+      const recipients = users
+        .filter(u => u.email)
+        .map(u => ({ email: u.email, name: u.displayName || u.name || '' }));
+
+      if (recipients.length > 0) {
+        const emailRes = await fetch('/api/send-announcement', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: form.title, message: form.message, type: form.type, recipients }),
+        });
+        const emailData = await emailRes.json();
+        toast.success(`Announcement sent to ${emailData.sent ?? recipients.length} member${(emailData.sent ?? recipients.length) !== 1 ? 's' : ''}`);
+      } else {
+        toast.success('Announcement posted — no member emails found');
+      }
+
       setForm({ title: '', message: '', type: 'general' });
       setCreating(false);
       await load();

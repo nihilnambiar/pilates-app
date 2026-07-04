@@ -54,7 +54,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
             >
-              <h1 className="font-display text-lg font-semibold text-blush-700 leading-none">Vigour</h1>
+              <img src="/logop.png" alt="Vigour Pilates Studio" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
               <p className="font-body text-[10px] text-[#8a7b76] tracking-widest uppercase mt-0.5">Pilates Studio</p>
             </motion.div>
           )}

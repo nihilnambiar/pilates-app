@@ -3,18 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Sparkles, Mail, CheckCircle, ChevronRight } from "lucide-react";
 import Anthropic from "@anthropic-ai/sdk";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
-import emailjs from "@emailjs/browser";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../../services/firebase";
 
 const C = {
   black:  "#0d0d0d",
-  forest: "#1a2e1e",
-  green:  "#2d5a34",
-  lime:   "#7db87a",
-  gold:   "#c9a84c",
-  ivory:  "#f5f0e8",
-  cream:  "#faf7f2",
+  forest: "#0a1e32",
+  green:  "#1a3d6b",
+  lime:   "#9DC230",
+  gold:   "#1E80C2",
+  ivory:  "#f0f5fa",
+  cream:  "#f5f8fc",
   white:  "#ffffff",
-  muted:  "#6b6b5e",
+  muted:  "#6b7a8d",
 };
 
 const QUESTIONS = [
@@ -22,139 +23,139 @@ const QUESTIONS = [
     id: 1,
     q: "What's bringing you to Pilates?",
     options: [
-      { label: "Build core strength & tone", tags: ["power","reformer"] },
-      { label: "Improve flexibility & posture", tags: ["mat","barre"] },
-      { label: "Recover from pain or injury", tags: ["restore","prenatal"] },
-      { label: "Complement my existing training", tags: ["power","reformer"] },
+      { label: "Build core strength & tone", tags: ["chair","reformer"] },
+      { label: "Improve flexibility & posture", tags: ["barrel","cadillac"] },
+      { label: "Recover from pain or injury", tags: ["restore","cadillac"] },
+      { label: "Complement my existing training", tags: ["chair","reformer"] },
     ],
   },
   {
     id: 2,
     q: "How active are you right now?",
     options: [
-      { label: "Mostly sedentary, just starting out", tags: ["mat","restore"] },
-      { label: "Light movement — walks, stretching", tags: ["mat","barre"] },
-      { label: "Regular gym or fitness classes", tags: ["reformer","power"] },
-      { label: "Training 5+ days a week", tags: ["power","reformer"] },
+      { label: "Mostly sedentary, just starting out", tags: ["barrel","restore"] },
+      { label: "Light movement — walks, stretching", tags: ["barrel","cadillac"] },
+      { label: "Regular gym or fitness classes", tags: ["reformer","chair"] },
+      { label: "Training 5+ days a week", tags: ["chair","reformer"] },
     ],
   },
   {
     id: 3,
     q: "Any prior Pilates experience?",
     options: [
-      { label: "Completely new — first time!", tags: ["mat","restore"] },
-      { label: "Tried it once or twice", tags: ["mat","barre"] },
-      { label: "A few months of practice", tags: ["reformer","barre"] },
-      { label: "Over a year of regular practice", tags: ["power","reformer"] },
+      { label: "Completely new — first time!", tags: ["barrel","restore"] },
+      { label: "Tried it once or twice", tags: ["barrel","cadillac"] },
+      { label: "A few months of practice", tags: ["reformer","cadillac"] },
+      { label: "Over a year of regular practice", tags: ["chair","reformer"] },
     ],
   },
   {
     id: 4,
     q: "Any physical conditions or limitations?",
     options: [
-      { label: "None — feeling great!", tags: ["power","reformer","barre"] },
-      { label: "Chronic back or neck pain", tags: ["restore","mat"] },
-      { label: "Joint issues (knees, hips)", tags: ["restore","mat"] },
-      { label: "Pregnant or postpartum", tags: ["prenatal"] },
+      { label: "None — feeling great!", tags: ["chair","reformer","cadillac"] },
+      { label: "Chronic back or neck pain", tags: ["restore","barrel"] },
+      { label: "Joint issues (knees, hips)", tags: ["restore","barrel"] },
+      { label: "Postpartum or returning from injury", tags: ["cadillac","restore"] },
     ],
   },
   {
     id: 5,
     q: "How many sessions per week can you commit to?",
     options: [
-      { label: "1 session — testing the waters", tags: ["mat","restore"] },
-      { label: "2 sessions — building a routine", tags: ["mat","barre"] },
-      { label: "3 sessions — serious commitment", tags: ["reformer","barre"] },
-      { label: "4+ sessions — fully dedicated", tags: ["power","reformer"] },
+      { label: "1 session — testing the waters", tags: ["barrel","restore"] },
+      { label: "2 sessions — building a routine", tags: ["barrel","cadillac"] },
+      { label: "3 sessions — serious commitment", tags: ["reformer","cadillac"] },
+      { label: "4+ sessions — fully dedicated", tags: ["chair","reformer"] },
     ],
   },
   {
     id: 6,
     q: "How do you like your workouts to feel?",
     options: [
-      { label: "Slow, intentional, almost meditative", tags: ["restore","mat"] },
-      { label: "Balanced — steady but not too easy", tags: ["barre","mat"] },
-      { label: "Challenging — I want to sweat", tags: ["power","reformer"] },
-      { label: "Varied — mix of everything!", tags: ["reformer","barre"] },
+      { label: "Slow, intentional, almost meditative", tags: ["restore","barrel"] },
+      { label: "Balanced — steady but not too easy", tags: ["cadillac","barrel"] },
+      { label: "Challenging — I want to sweat", tags: ["chair","reformer"] },
+      { label: "Varied — mix of everything!", tags: ["reformer","cadillac"] },
     ],
   },
   {
     id: 7,
     q: "What matters most to you in a class?",
     options: [
-      { label: "Mental calm and stress relief", tags: ["restore","mat"] },
-      { label: "Visible physical transformation", tags: ["power","reformer"] },
-      { label: "Learning proper technique", tags: ["mat","reformer"] },
-      { label: "Grace, elegance, and poise", tags: ["barre","prenatal"] },
+      { label: "Mental calm and stress relief", tags: ["restore","barrel"] },
+      { label: "Visible physical transformation", tags: ["chair","reformer"] },
+      { label: "Learning proper technique", tags: ["barrel","reformer"] },
+      { label: "Grace, elegance, and body awareness", tags: ["cadillac","barrel"] },
     ],
   },
   {
     id: 8,
     q: "How does your body feel right now?",
     options: [
-      { label: "Stiff and tight — needs to loosen up", tags: ["restore","barre"] },
-      { label: "Generally okay, could be better", tags: ["mat","reformer"] },
-      { label: "Energized and ready to work hard", tags: ["power","reformer"] },
-      { label: "Sore or recovering from strain", tags: ["restore","prenatal"] },
+      { label: "Stiff and tight — needs to loosen up", tags: ["restore","cadillac"] },
+      { label: "Generally okay, could be better", tags: ["barrel","reformer"] },
+      { label: "Energized and ready to work hard", tags: ["chair","reformer"] },
+      { label: "Sore or recovering from strain", tags: ["restore","cadillac"] },
     ],
   },
   {
     id: 9,
     q: "What's your age range?",
     options: [
-      { label: "Under 25", tags: ["power","barre"] },
-      { label: "25 – 35", tags: ["reformer","barre"] },
-      { label: "36 – 50", tags: ["mat","reformer"] },
-      { label: "50+", tags: ["restore","mat"] },
+      { label: "Under 25", tags: ["chair","cadillac"] },
+      { label: "25 – 35", tags: ["reformer","cadillac"] },
+      { label: "36 – 50", tags: ["barrel","reformer"] },
+      { label: "50+", tags: ["restore","barrel"] },
     ],
   },
   {
     id: 10,
     q: "Pick the statement that resonates most:",
     options: [
-      { label: "I want a stronger, flatter core", tags: ["power","mat"] },
-      { label: "I want to move without pain daily", tags: ["restore","mat"] },
-      { label: "I want to stand taller and look confident", tags: ["barre","reformer"] },
-      { label: "I want functional athletic strength", tags: ["power","reformer"] },
+      { label: "I want a stronger, flatter core", tags: ["chair","barrel"] },
+      { label: "I want to move without pain daily", tags: ["restore","barrel"] },
+      { label: "I want to stand taller and look confident", tags: ["cadillac","reformer"] },
+      { label: "I want functional athletic strength", tags: ["chair","reformer"] },
     ],
   },
   {
     id: 11,
     q: "Do you have a background in any of these?",
     options: [
-      { label: "Yoga or meditation", tags: ["restore","mat"] },
-      { label: "Dance or performing arts", tags: ["barre","prenatal"] },
-      { label: "Weight training or CrossFit", tags: ["power","reformer"] },
-      { label: "None of the above", tags: ["mat","reformer"] },
+      { label: "Yoga or meditation", tags: ["restore","barrel"] },
+      { label: "Dance or performing arts", tags: ["cadillac","barrel"] },
+      { label: "Weight training or CrossFit", tags: ["chair","reformer"] },
+      { label: "None of the above", tags: ["barrel","reformer"] },
     ],
   },
   {
     id: 12,
     q: "When you hit a hard exercise, you:",
     options: [
-      { label: "Ease back and honour your limits", tags: ["restore","prenatal"] },
-      { label: "Work through it steadily", tags: ["mat","reformer"] },
-      { label: "Push harder — that's the point", tags: ["power"] },
-      { label: "Modify it and try again next time", tags: ["barre","mat"] },
+      { label: "Ease back and honour your limits", tags: ["restore","cadillac"] },
+      { label: "Work through it steadily", tags: ["barrel","reformer"] },
+      { label: "Push harder — that's the point", tags: ["chair","reformer"] },
+      { label: "Modify it and try again next time", tags: ["cadillac","barrel"] },
     ],
   },
   {
     id: 13,
     q: "Biggest obstacle to staying consistent?",
     options: [
-      { label: "Not enough time", tags: ["mat","barre"] },
-      { label: "Lack of motivation or accountability", tags: ["reformer","barre"] },
-      { label: "Physical pain or old injuries", tags: ["restore","mat"] },
-      { label: "Haven't found the right method yet", tags: ["reformer","power"] },
+      { label: "Not enough time", tags: ["barrel","cadillac"] },
+      { label: "Lack of motivation or accountability", tags: ["reformer","cadillac"] },
+      { label: "Physical pain or old injuries", tags: ["restore","barrel"] },
+      { label: "Haven't found the right method yet", tags: ["reformer","chair"] },
     ],
   },
   {
     id: 14,
     q: "After a perfect session, you feel:",
     options: [
-      { label: "Zen, stretched, and completely calm", tags: ["restore","mat"] },
-      { label: "Strong, sculpted, and accomplished", tags: ["power","reformer"] },
-      { label: "Graceful and long in your limbs", tags: ["barre","prenatal"] },
+      { label: "Zen, stretched, and completely calm", tags: ["restore","barrel"] },
+      { label: "Strong, sculpted, and accomplished", tags: ["chair","reformer"] },
+      { label: "Graceful and long in your limbs", tags: ["cadillac","barrel"] },
       { label: "Like your body genuinely needed that", tags: ["restore","reformer"] },
     ],
   },
@@ -162,25 +163,24 @@ const QUESTIONS = [
     id: 15,
     q: "What would make this studio feel like home?",
     options: [
-      { label: "Small classes where I'm truly seen", tags: ["mat","restore"] },
-      { label: "Results I can measure and track", tags: ["power","reformer"] },
-      { label: "Beautiful, calming atmosphere", tags: ["barre","prenatal"] },
+      { label: "Small classes where I'm truly seen", tags: ["barrel","restore"] },
+      { label: "Results I can measure and track", tags: ["chair","reformer"] },
+      { label: "Beautiful, calming atmosphere", tags: ["cadillac","restore"] },
       { label: "Instructors who understand my body", tags: ["restore","reformer"] },
     ],
   },
 ];
 
 const CLASS_INFO = {
-  mat:      { name: "Mat Pilates",    emoji: "🧘", color: "#7db87a", desc: "Core strength & flexibility on the mat — perfect foundation for any level." },
-  reformer: { name: "Reformer",       emoji: "⚡", color: "#c9a84c", desc: "Full-body resistance on Balanced Body reformers — the gold standard of Pilates." },
-  barre:    { name: "Barre Fusion",   emoji: "🩰", color: "#e8a598", desc: "Ballet-inspired sculpting for a long, graceful, and toned physique." },
-  restore:  { name: "Core & Restore", emoji: "🌿", color: "#88c8a8", desc: "Deep core work combined with therapeutic stretching — healing from the inside out." },
-  power:    { name: "Power Pilates",  emoji: "🔥", color: "#e87a4a", desc: "High-intensity challenge for those ready to push their limits." },
-  prenatal: { name: "Prenatal Flow",  emoji: "🌸", color: "#e8c8d8", desc: "Safe, nurturing movement designed for every trimester." },
+  reformer: { name: "Reformer",                 emoji: "⚡", color: "#1E80C2", desc: "Full-body resistance on Balanced Body reformers — the gold standard of Pilates." },
+  barrel:   { name: "Barrel Ladder",            emoji: "🌀", color: "#9DC230", desc: "Spinal articulation, flexibility & full-body control — perfect for all levels." },
+  restore:  { name: "Core & Restore",           emoji: "🌿", color: "#88c8a8", desc: "Deep core work combined with therapeutic stretching — healing from the inside out." },
+  chair:    { name: "Chair Pilates",            emoji: "🔥", color: "#e87a4a", desc: "High-intensity challenge using the Pilates chair — for those ready to push their limits." },
+  cadillac: { name: "Cadillac Machine Pilates", emoji: "✨", color: "#c084fc", desc: "Full-body conditioning on the Cadillac apparatus — elegant, effective, all levels." },
 };
 
 function scoreAnswers(answers) {
-  const scores = { mat: 0, reformer: 0, barre: 0, restore: 0, power: 0, prenatal: 0 };
+  const scores = { reformer: 0, barrel: 0, restore: 0, chair: 0, cadillac: 0 };
   answers.forEach(a => {
     if (!a) return;
     a.tags.forEach(tag => { scores[tag] = (scores[tag] || 0) + 1; });
@@ -232,25 +232,22 @@ Be warm, specific, encouraging. Use "you" not "they". No generic fluff.`,
 }
 
 async function sendEmail(toEmail, toName, topClass, analysis, radarData) {
-  const serviceId  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-  const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-  const publicKey  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+  // Save to Firestore
+  try {
+    await addDoc(collection(db, "quizResults"), {
+      name: toName, email: toEmail, topClass,
+      analysis, radarData,
+      createdAt: serverTimestamp(),
+    });
+  } catch (e) { console.warn("Firestore save failed", e); }
 
-  if (!serviceId || !templateId || !publicKey) return false;
-
-  const radarSummary = radarData.map(r => `${r.subject}: ${r.value}%`).join(" | ");
-
-  await emailjs.send(serviceId, templateId, {
-    to_name:        toName,
-    to_email:       toEmail,
-    class_name:     CLASS_INFO[topClass].name,
-    class_emoji:    CLASS_INFO[topClass].emoji,
-    class_desc:     CLASS_INFO[topClass].desc,
-    analysis:       analysis,
-    radar_summary:  radarSummary,
-    studio_url:     window.location.origin,
-  }, publicKey);
-
+  // Send email via Vercel API
+  const res = await fetch("/api/send-quiz-result", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: toName, email: toEmail, topClass, analysis, radarData }),
+  });
+  if (!res.ok) throw new Error("Email send failed");
   return true;
 }
 
@@ -262,7 +259,7 @@ function QuestionSlide({ q, index, total, selected, onSelect }) {
       exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.35, ease: "easeInOut" }}>
 
       <p className="font-body text-xs tracking-widest uppercase mb-3"
-        style={{ color: "rgba(201,168,76,0.7)", letterSpacing: "0.2em" }}>
+        style={{ color: "rgba(30,128,194,0.7)", letterSpacing: "0.2em" }}>
         Question {index + 1} of {total}
       </p>
       <h3 className="font-display font-semibold mb-8 leading-snug"
@@ -278,7 +275,7 @@ function QuestionSlide({ q, index, total, selected, onSelect }) {
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               className="text-left px-5 py-4 rounded-2xl border transition-all duration-200 font-body text-sm"
               style={{
-                background: active ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
+                background: active ? "rgba(30,128,194,0.15)" : "rgba(255,255,255,0.04)",
                 borderColor: active ? C.gold : "rgba(255,255,255,0.1)",
                 color: active ? C.gold : "rgba(255,255,255,0.75)",
                 boxShadow: active ? `0 0 0 1px ${C.gold}` : "none",
@@ -338,9 +335,9 @@ function ResultsView({ topClass, analysis, radarData, onSendEmail }) {
 
       {/* Top recommendation card */}
       <div className="rounded-3xl p-6 mb-6 border"
-        style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(201,168,76,0.25)" }}>
+        style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(30,128,194,0.25)" }}>
         <p className="font-body text-xs tracking-widest uppercase mb-3"
-          style={{ color: "rgba(201,168,76,0.7)", letterSpacing: "0.2em" }}>Your perfect match</p>
+          style={{ color: "rgba(30,128,194,0.7)", letterSpacing: "0.2em" }}>Your perfect match</p>
         <div className="flex items-center gap-4 mb-3">
           <span style={{ fontSize: "2.5rem" }}>{cls.emoji}</span>
           <div>
@@ -380,7 +377,7 @@ function ResultsView({ topClass, analysis, radarData, onSendEmail }) {
       </div>
 
       {/* Email capture */}
-      <div className="rounded-3xl p-6 border" style={{ background: "rgba(201,168,76,0.06)", borderColor: "rgba(201,168,76,0.2)" }}>
+      <div className="rounded-3xl p-6 border" style={{ background: "rgba(30,128,194,0.06)", borderColor: "rgba(30,128,194,0.2)" }}>
         {sent ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="flex items-center gap-3 py-2">
@@ -409,7 +406,7 @@ function ResultsView({ topClass, analysis, radarData, onSendEmail }) {
               </div>
               <button onClick={handleSend} disabled={sending}
                 className="flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-xl font-body font-semibold text-sm transition-all"
-                style={{ background: sending ? "rgba(201,168,76,0.4)" : C.gold, color: C.black }}>
+                style={{ background: sending ? "rgba(30,128,194,0.4)" : C.gold, color: C.black }}>
                 {sending ? "Sending…" : <><span>Send my results</span><ChevronRight size={16}/></>}
               </button>
             </div>
@@ -425,7 +422,7 @@ function ResultsView({ topClass, analysis, radarData, onSendEmail }) {
       <div className="text-center mt-6">
         <a href="#trial"
           className="inline-flex items-center gap-2 font-body font-semibold px-8 py-4 rounded-2xl transition-all"
-          style={{ background: C.gold, color: C.black, boxShadow: "0 8px 30px rgba(201,168,76,0.35)", fontSize: "15px" }}>
+          style={{ background: C.gold, color: C.black, boxShadow: "0 8px 30px rgba(30,128,194,0.35)", fontSize: "15px" }}>
           Book a Trial — ₹1,000 <ArrowRight size={18} />
         </a>
         <p className="font-body text-xs mt-3" style={{ color: "rgba(255,255,255,0.3)" }}>
@@ -479,6 +476,16 @@ export default function PilatesQuiz() {
       setError("");
     }
     setPhase("results");
+
+    // Save result to localStorage so the chatbot can reference it
+    try {
+      localStorage.setItem("vigour_quiz_result", JSON.stringify({
+        topClass: top,
+        analysis: accumulated,
+        radarData: radar,
+        completedAt: new Date().toISOString(),
+      }));
+    } catch (_) {}
   };
 
   const goBack = () => {
@@ -501,12 +508,12 @@ export default function PilatesQuiz() {
       {/* Ambient orbs */}
       <div className="absolute pointer-events-none" style={{
         width: "600px", height: "600px", borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(45,90,52,0.2) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(26,61,107,0.2) 0%, transparent 70%)",
         top: "-200px", right: "-100px", filter: "blur(80px)"
       }} />
       <div className="absolute pointer-events-none" style={{
         width: "400px", height: "400px", borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(30,128,194,0.08) 0%, transparent 70%)",
         bottom: "0", left: "-100px", filter: "blur(60px)"
       }} />
 
@@ -516,7 +523,7 @@ export default function PilatesQuiz() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} className="mb-10">
           <p className="font-body text-xs tracking-widest uppercase mb-3"
-            style={{ color: "rgba(201,168,76,0.7)", letterSpacing: "0.2em" }}>Personalised for you</p>
+            style={{ color: "rgba(30,128,194,0.7)", letterSpacing: "0.2em" }}>Personalised for you</p>
           <h2 className="font-display font-semibold leading-none"
             style={{ color: C.white, fontSize: "clamp(2.5rem,6vw,4rem)" }}>
             Find your<br /><em style={{ fontStyle: "italic", color: C.gold }}>perfect class</em>
@@ -524,7 +531,7 @@ export default function PilatesQuiz() {
           <p className="font-body text-sm mt-4" style={{ color: "rgba(255,255,255,0.4)" }}>
             15 questions · 3 minutes · AI-powered analysis sent to your inbox
           </p>
-          <p className="font-body text-xs mt-2" style={{color:"rgba(125,184,122,0.6)"}}>
+          <p className="font-body text-xs mt-2" style={{color:"rgba(157,194,48,0.6)"}}>
             ✓ Taken by 200+ Vigour members · Results include personalised class recommendation + 30-day plan
           </p>
         </motion.div>
@@ -575,7 +582,7 @@ export default function PilatesQuiz() {
                     background: answers[current] ? C.gold : "rgba(255,255,255,0.07)",
                     color: answers[current] ? C.black : "rgba(255,255,255,0.2)",
                     cursor: answers[current] ? "pointer" : "not-allowed",
-                    boxShadow: answers[current] ? "0 6px 20px rgba(201,168,76,0.3)" : "none",
+                    boxShadow: answers[current] ? "0 6px 20px rgba(30,128,194,0.3)" : "none",
                   }}>
                   {current === QUESTIONS.length - 1 ? (
                     <><Sparkles size={16} /> See My Results</>

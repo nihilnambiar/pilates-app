@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
-import { CheckCircle, XCircle, Star, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Star, Clock, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATUS_TABS = ['pending', 'published', 'rejected'];
@@ -21,9 +21,10 @@ function StarRow({ rating }) {
 }
 
 export default function TestimonialsAdmin() {
-  const [testimonials, setTestimonials] = useState([]);
-  const [tab, setTab]                   = useState('pending');
-  const [acting, setActing]             = useState(null);
+  const [testimonials, setTestimonials]   = useState([]);
+  const [tab, setTab]                     = useState('pending');
+  const [acting, setActing]               = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
     const q = query(collection(db, 'testimonials'), orderBy('createdAt', 'desc'));
@@ -42,6 +43,16 @@ export default function TestimonialsAdmin() {
       toast.error('Failed to update');
     } finally {
       setActing(null);
+    }
+  };
+
+  const deleteTestimonial = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'testimonials', id));
+      toast.success('Testimonial deleted');
+      setConfirmDelete(null);
+    } catch {
+      toast.error('Delete failed');
     }
   };
 
@@ -147,6 +158,25 @@ export default function TestimonialsAdmin() {
                       style={{ background:'#eef6f0', color:'#458361' }}>Restore & Publish</button>
                   </div>
                 )}
+                <div className="mt-2 flex justify-end">
+                  {confirmDelete === t.id ? (
+                    <div className="flex gap-1">
+                      <button onClick={() => deleteTestimonial(t.id)}
+                        className="px-3 py-1.5 rounded-xl font-body text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors">
+                        Confirm delete
+                      </button>
+                      <button onClick={() => setConfirmDelete(null)}
+                        className="px-3 py-1.5 rounded-xl font-body text-xs text-[#6b6b5e] border border-[#e8e0d8] bg-white hover:bg-[#faf7f2] transition-colors">
+                        No
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setConfirmDelete(t.id)}
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg font-body text-xs text-[#aaa] hover:text-red-500 hover:bg-red-50 transition-colors">
+                      <Trash2 size={13} /> Delete
+                    </button>
+                  )}
+                </div>
               </motion.div>
             ))}
           </motion.div>

@@ -7,7 +7,11 @@ import { Toaster } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import ReviewPage from './pages/ReviewPage';
+import TermsPage from './pages/TermsPage';
+import ComparePage from './pages/ComparePage';
 import TestimonialsAdmin from './pages/admin/TestimonialsAdmin';
+import TrialBookingsAdmin from './pages/admin/TrialBookingsAdmin';
+import QuizResultsAdmin from './pages/admin/QuizResultsAdmin';
 import Dashboard from './pages/user/Dashboard';
 import BookClass from './pages/user/BookClass';
 import Attendance from './pages/user/Attendance';
@@ -53,6 +57,12 @@ export default function App() {
         {/* Review page — public, no auth required */}
         <Route path="/review" element={<ReviewPage />} />
 
+        {/* Terms & Conditions */}
+        <Route path="/terms" element={<TermsPage />} />
+
+        {/* Pilates vs Gym vs Yoga */}
+        <Route path="/compare" element={<ComparePage />} />
+
         {/* Auth */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<AuthPage />} />
@@ -79,6 +89,8 @@ export default function App() {
             <Route path="/admin/bookings" element={<BookingsView />} />
             <Route path="/admin/announcements" element={<Announcements />} />
             <Route path="/admin/testimonials" element={<TestimonialsAdmin />} />
+            <Route path="/admin/trials" element={<TrialBookingsAdmin />} />
+            <Route path="/admin/quiz-results" element={<QuizResultsAdmin />} />
           </Route>
         </Route>
 

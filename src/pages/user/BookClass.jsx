@@ -16,7 +16,7 @@ const getDates = () =>
   Array.from({ length: 14 }, (_, i) => addDays(startOfToday(), i));
 
 export default function BookClass() {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [slots, setSlots] = useState([]);
   const [userBookings, setUserBookings] = useState([]);
@@ -57,6 +57,25 @@ export default function BookClass() {
       await bookSlot(currentUser.uid, confirm.slot.id);
       toast.success(`🌸 Booked: ${confirm.slot.className || 'Pilates Class'} at ${formatTime(confirm.slot.time)}`);
       await loadSlots(selectedDate);
+
+      // Send confirmation email + calendar invite
+      try {
+        await fetch('/api/send-booking-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userName:  userProfile?.name || currentUser.displayName || 'Member',
+            userEmail: currentUser.email,
+            className: confirm.slot.className || 'Pilates Class',
+            date:      confirm.slot.date,
+            time:      formatTime(confirm.slot.time),
+            trainer:   confirm.slot.trainer || '',
+            location:  'Vigour Pilates Studio, Pune',
+          }),
+        });
+      } catch (emailErr) {
+        console.error('Booking email error:', emailErr);
+      }
     } catch (e) {
       toast.error(e.message || 'Booking failed');
     } finally {

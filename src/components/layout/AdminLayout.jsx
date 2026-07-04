@@ -4,7 +4,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Users, Calendar, ClipboardList,
-  Megaphone, BarChart2, ChevronLeft, LogOut, ShieldCheck
+  Megaphone, BarChart2, ChevronLeft, LogOut, ShieldCheck, FlaskConical, Brain
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { logoutUser } from '../../services/authService';
@@ -18,6 +18,8 @@ const adminNav = [
   { to: '/admin/bookings', icon: ClipboardList, label: 'Bookings' },
   { to: '/admin/attendance', icon: BarChart2, label: 'Attendance' },
   { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
+  { to: '/admin/trials', icon: FlaskConical, label: 'Trial Bookings' },
+  { to: '/admin/quiz-results', icon: Brain, label: 'Quiz Results' },
 ];
 
 export default function AdminLayout() {
@@ -55,7 +57,7 @@ export default function AdminLayout() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <h1 className="font-display text-lg font-semibold text-white leading-none">Vigour</h1>
+                <img src="/logop.png" alt="Vigour Pilates Studio" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
                 <p className="font-body text-[10px] text-blush-300 tracking-widest uppercase mt-0.5">Admin Portal</p>
               </motion.div>
             )}

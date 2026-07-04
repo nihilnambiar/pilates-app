@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Chrome } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { registerUser, loginUser, signInWithGoogle, resetPassword } from '../services/authService';
+import { registerUser, loginUser, signInWithGoogle, resetPassword, getUserProfile } from '../services/authService';
 
 const tabs = ['login', 'signup', 'forgot'];
 
@@ -41,8 +41,9 @@ export default function AuthPage() {
     try {
       if (tab === 'login') {
         const user = await loginUser({ email: form.email, password: form.password });
+        const profile = await getUserProfile(user.uid);
         toast.success('Welcome back!');
-        navigate('/dashboard');
+        navigate(profile?.role === 'admin' ? '/admin' : '/dashboard');
       } else if (tab === 'signup') {
         await registerUser({ name: form.name, email: form.email, password: form.password });
         toast.success('Account created! Welcome to Vigour 🌸');
@@ -53,11 +54,14 @@ export default function AuthPage() {
         setTab('login');
       }
     } catch (err) {
-      const msg = err.message?.includes('user-not-found') ? 'No account found with this email'
-        : err.message?.includes('wrong-password') ? 'Incorrect password'
-        : err.message?.includes('email-already-in-use') ? 'Email already registered'
+      const code = err.code || '';
+      const msg = (code.includes('user-not-found') || code.includes('invalid-credential') || code.includes('invalid-email'))
+        ? 'Invalid email or password'
+        : code.includes('wrong-password') ? 'Incorrect password'
+        : code.includes('email-already-in-use') ? 'Email already registered'
+        : code.includes('too-many-requests') ? 'Too many attempts. Please try again later.'
         : err.message?.includes('already booked') ? err.message
-        : 'Something went wrong. Please try again.';
+        : `Something went wrong (${code || err.message})`;
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -67,9 +71,10 @@ export default function AuthPage() {
   const handleGoogle = async () => {
     setLoading(true);
     try {
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+      const profile = await getUserProfile(user.uid);
       toast.success('Welcome to Vigour!');
-      navigate('/dashboard');
+      navigate(profile?.role === 'admin' ? '/admin' : '/dashboard');
     } catch {
       toast.error('Google sign-in failed');
     } finally {

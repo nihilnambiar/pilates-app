@@ -1,7 +1,7 @@
 // src/pages/user/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Calendar, TrendingUp, Award, Clock, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getUserBookings, getAnnouncements, getMonthlyAttendance } from '../../services/slotService';
@@ -18,6 +18,9 @@ const fadeUp = {
 
 export default function Dashboard() {
   const { userProfile } = useAuth();
+
+  if (userProfile?.role === 'admin') return <Navigate to="/admin" replace />;
+
   const [bookings, setBookings] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [monthlyCount, setMonthlyCount] = useState(0);

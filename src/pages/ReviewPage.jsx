@@ -6,7 +6,7 @@ import { db } from '../services/firebase';
 import { Star } from 'lucide-react';
 
 const C = {
-  forest: '#1a2e1e', gold: '#c9a84c', ivory: '#f5f0e8',
+  forest: '#0a1e32', gold: '#1E80C2', ivory: '#f0f5fa',
   black: '#0d0d0d', muted: '#6b5b55', border: '#e5ddd5',
 };
 
