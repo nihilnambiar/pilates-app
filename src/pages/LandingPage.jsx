@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionValueEvent } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -939,6 +939,38 @@ export default function LandingPage() {
   const navMT   = useSpring(_navMT,   NAV_SP);
   const navPX   = useSpring(_navPX,   NAV_SP);
 
+  // ── Nav light-section tint ──────────────────────────────────────
+  // The pill picks up a light wash (and darkens its text) whenever a
+  // cream/white section is scrolling underneath it, so it stays readable
+  // instead of turning into near-invisible white-on-white glass.
+  const classesRef  = useRef(null);
+  const locationRef = useRef(null);
+  const NAV_BAND = 90; // px from viewport top counted as "under the pill"
+
+  const [onLight, setOnLight] = useState(false);
+  const tintTarget = useMotionValue(0);
+  const navTint    = useSpring(tintTarget, { stiffness: 120, damping: 24, mass: 1 });
+
+  useMotionValueEvent(scrollY, "change", () => {
+    const hits = [classesRef, locationRef].some(ref => {
+      const r = ref.current?.getBoundingClientRect();
+      return r && r.top < NAV_BAND && r.bottom > 0;
+    });
+    tintTarget.set(hits ? 1 : 0);
+    setOnLight(prev => (prev === hits ? prev : hits));
+  });
+
+  const navOverlay    = useTransform(navTint, [0, 1], ["rgba(255,255,255,0)", "rgba(255,255,255,0.82)"]);
+  const navFg         = useTransform(navTint, [0, 1], ["rgba(255,255,255,0.92)", "rgba(13,30,48,0.9)"]);
+  const navLink       = useTransform(navTint, [0, 1], ["rgba(255,255,255,0.6)", "rgba(13,30,48,0.55)"]);
+  const navLinkHover  = useTransform(navTint, [0, 1], ["rgba(255,255,255,1)", "rgba(13,30,48,0.92)"]);
+  const navQuiz       = useTransform(navTint, [0, 1], ["rgba(255,255,255,0.9)", "rgba(13,30,48,0.85)"]);
+  const navDivider    = useTransform(navTint, [0, 1], ["rgba(255,255,255,0.2)", "rgba(13,30,48,0.15)"]);
+  const navCtaBg      = useTransform(navTint, [0, 1], ["rgba(255,255,255,0.15)", "rgba(13,30,48,0.08)"]);
+  const navCtaBorder  = useTransform(navTint, [0, 1], ["rgba(255,255,255,0.3)", "rgba(13,30,48,0.18)"]);
+  const navCtaText    = useTransform(navTint, [0, 1], ["#ffffff", "#0d1e30"]);
+  const navIcon       = useTransform(navTint, [0, 1], ["rgba(255,255,255,0.85)", "rgba(13,30,48,0.8)"]);
+
   return (
     <div ref={containerRef} className="font-body"
       style={{ background:C.cream, color:C.black, overflowX:"clip" }}>
@@ -947,8 +979,19 @@ export default function LandingPage() {
       <div className="fixed inset-x-0 top-0 z-50 flex justify-center pointer-events-none px-3 sm:px-4">
         <motion.div
           className="pointer-events-auto w-full"
-          style={{ maxWidth: navMaxW, marginTop: navMT, borderRadius: NAV_RADIUS, overflow: "hidden" }}
+          style={{
+            maxWidth: navMaxW, marginTop: navMT, borderRadius: NAV_RADIUS, overflow: "hidden",
+            "--nav-fg": navFg, "--nav-link": navLink, "--nav-link-hover": navLinkHover,
+            "--nav-quiz": navQuiz, "--nav-divider": navDivider,
+            "--nav-cta-bg": navCtaBg, "--nav-cta-border": navCtaBorder, "--nav-cta-text": navCtaText,
+            "--nav-icon": navIcon,
+          }}
         >
+          <style>{`
+            .vg-nav-link { color: var(--nav-link); transition: color 160ms ease; }
+            .vg-nav-link:hover { color: var(--nav-link-hover); }
+            .vg-nav-quiz:hover { opacity: 0.65; }
+          `}</style>
           <GlassSurface
             width="100%" height="100%"
             borderRadius={NAV_RADIUS}
@@ -956,11 +999,13 @@ export default function LandingPage() {
             saturation={1.6}
             brightness={55}
             opacity={0.88}
-            blur={14}
-            distortionScale={-160}
+            blur={onLight ? 10 : 14}
+            distortionScale={onLight ? -70 : -160}
           >
+            <motion.div className="absolute inset-0 pointer-events-none rounded-[inherit]" style={{ background: navOverlay }} />
+
             <motion.div
-              className="w-full flex items-center justify-between"
+              className="relative z-10 w-full flex items-center justify-between"
               style={{ paddingTop: "10px", paddingBottom: "10px", paddingLeft: navPX, paddingRight: navPX }}
             >
               {/* Logo */}
@@ -969,9 +1014,9 @@ export default function LandingPage() {
                 <motion.span style={{ pointerEvents: "none" }}
                   className="hidden sm:block"
                   transition={{ duration: 0 }}>
-                  <span style={{ fontFamily:"'Playfair Display', serif", fontSize:"14px", fontWeight:600, letterSpacing:"0.02em", color:"rgba(255,255,255,0.92)", whiteSpace:"nowrap" }}>
+                  <motion.span style={{ fontFamily:"'Playfair Display', serif", fontSize:"14px", fontWeight:600, letterSpacing:"0.02em", color:"var(--nav-fg)", whiteSpace:"nowrap" }}>
                     Vigour Pilates Studio
-                  </span>
+                  </motion.span>
                 </motion.span>
               </div>
 
@@ -981,36 +1026,30 @@ export default function LandingPage() {
               >
                 {["classes","pricing","testimonials","faq"].map(l=>(
                   <a key={l} href={`#${l}`}
-                    className="font-body text-sm capitalize transition-colors"
-                    style={{ color:"rgba(255,255,255,0.6)" }}
-                    onMouseEnter={e=>e.target.style.color="rgba(255,255,255,1)"}
-                    onMouseLeave={e=>e.target.style.color="rgba(255,255,255,0.6)"}>{l}</a>
+                    className="vg-nav-link font-body text-sm capitalize">{l}</a>
                 ))}
-                <div style={{ width:"1px", height:"14px", background:"rgba(255,255,255,0.2)" }}/>
-                <a href="#quiz" className="font-body text-sm transition-colors" style={{ color:"rgba(255,255,255,0.9)", fontWeight:600 }}
-                  onMouseEnter={e=>e.target.style.opacity="0.65"} onMouseLeave={e=>e.target.style.opacity="1"}>Quiz</a>
-                <a href="/compare" className="font-body text-sm transition-colors" style={{ color:"rgba(255,255,255,0.6)" }}
-                  onMouseEnter={e=>e.target.style.color="rgba(255,255,255,1)"} onMouseLeave={e=>e.target.style.color="rgba(255,255,255,0.6)"}>Compare</a>
-                <a href="/terms" className="font-body text-sm transition-colors" style={{ color:"rgba(255,255,255,0.6)" }}
-                  onMouseEnter={e=>e.target.style.color="rgba(255,255,255,1)"} onMouseLeave={e=>e.target.style.color="rgba(255,255,255,0.6)"}>Terms</a>
+                <motion.div style={{ width:"1px", height:"14px", background:"var(--nav-divider)" }}/>
+                <a href="#quiz" className="vg-nav-quiz font-body text-sm transition-opacity" style={{ color:"var(--nav-quiz)", fontWeight:600 }}>Quiz</a>
+                <a href="/compare" className="vg-nav-link font-body text-sm">Compare</a>
+                <a href="/terms" className="vg-nav-link font-body text-sm">Terms</a>
               </motion.div>
 
               {/* Right side: CTA + mobile hamburger */}
               <div className="flex items-center gap-2 flex-shrink-0">
-                <a href="#trial"
+                <motion.a href="#trial"
                   className="font-body font-semibold rounded-full transition-all flex-shrink-0"
-                  style={{ background:"rgba(255,255,255,0.15)", color:"#fff",
-                    border:"1px solid rgba(255,255,255,0.3)",
+                  style={{ background:"var(--nav-cta-bg)", color:"var(--nav-cta-text)",
+                    border:"1px solid var(--nav-cta-border)",
                     backdropFilter:"blur(8px)",
                     padding:"8px 16px", fontSize:"12.5px", lineHeight:1, whiteSpace:"nowrap" }}>
                   <span className="hidden sm:inline">Book Your Trial</span>
                   <span className="sm:hidden">Book Trial</span>
-                </a>
+                </motion.a>
 
                 <motion.button
                   onClick={()=>setNavOpen(!navOpen)}
                   className="md:hidden p-2 rounded-xl"
-                  style={{ color:"rgba(255,255,255,0.85)" }}>
+                  style={{ color:"var(--nav-icon)" }}>
                   {navOpen ? <X size={19}/> : <Menu size={19}/>}
                 </motion.button>
               </div>
@@ -1184,7 +1223,7 @@ export default function LandingPage() {
       </section>
 
             {/* ── GOALS ──────────────────────────────── */}
-      <section id="classes" className="py-28 px-6" style={{background:C.cream}}>
+      <section id="classes" ref={classesRef} className="py-28 px-6" style={{background:C.cream}}>
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}}
             viewport={{once:true}} className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
@@ -1631,7 +1670,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── LOCATION ─────────────────────────────── */}
-      <section className="py-24 px-6" style={{background:C.cream}}>
+      <section ref={locationRef} className="py-24 px-6" style={{background:C.cream}}>
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}}
             viewport={{once:true}} className="mb-12">
