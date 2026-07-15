@@ -32,18 +32,10 @@ export default async function handler(req, res) {
     We just received your trial session request — and we're excited to have you experience Pilates with us.
   </p>
 
-  ${preferredDate && time ? `
   <p style="font-size:16px;color:#3a3a3a;line-height:1.8;margin:0 0 16px;">
     You're booked in for <strong style="color:#1a1a1a;">${preferredDate}</strong> at <strong style="color:#1a1a1a;">${time}</strong> — your spot is reserved.<br/>
     One of our team members may still reach out via call or WhatsApp to say hi before your session.
-  </p>` : preferredDate ? `
-  <p style="font-size:16px;color:#3a3a3a;line-height:1.8;margin:0 0 16px;">
-    Your preferred date is <strong style="color:#1a1a1a;">${preferredDate}</strong>, and we're currently reserving a spot for you.<br/>
-    One of our team members will reach out via call or WhatsApp within the next 24 hours to confirm your timing.
-  </p>` : `
-  <p style="font-size:16px;color:#3a3a3a;line-height:1.8;margin:0 0 16px;">
-    We're currently reserving a spot for you. One of our team members will reach out via call or WhatsApp within the next 24 hours to confirm your timing.
-  </p>`}
+  </p>
 
   <p style="font-size:16px;color:#3a3a3a;line-height:1.8;margin:0 0 28px;">
     Quick note: Our trial slots are limited each day to ensure personal attention, so we'll help you lock in the best available time.
@@ -72,10 +64,6 @@ export default async function handler(req, res) {
   </p>
 
   <div style="margin:0 0 28px;border-top:1px solid #e8e0d4;"></div>
-
-  <p style="font-size:16px;color:#3a3a3a;line-height:1.8;margin:0 0 28px;">
-    If you have a preferred time, just reply to this email and we'll prioritize it for you.
-  </p>
 
   <p style="font-size:16px;color:#3a3a3a;line-height:1.8;margin:0 0 24px;">
     We're looking forward to welcoming you to the studio, ${firstName} — this could be the start of something really powerful for your body and mind.
@@ -110,7 +98,7 @@ export default async function handler(req, res) {
 <p style="font-size:12px;color:#bbb;margin-top:20px;"><a href="https://vigourpilates.com/admin/trials" style="color:#c9a84c;">View in admin panel →</a></p>
 </body></html>`;
 
-  const text = `Hi ${firstName},\n\nWe just received your trial session request — and we're excited to have you experience Pilates with us.\n\n${preferredDate && time ? `You're booked in for ${preferredDate} at ${time} — your spot is reserved.\n` : preferredDate ? `Your preferred date is ${preferredDate}, and we're currently reserving a spot for you.\n` : ''}One of our team members will reach out via call or WhatsApp within the next 24 hours to confirm your timing.\n\nQuick note: Our trial slots are limited each day to ensure personal attention, so we'll help you lock in the best available time.\n\n---\n\nHere's how to prepare:\n- Wear comfortable, form-fitting clothes\n- Grip socks are recommended (available at the studio if needed)\n- Bring a water bottle\n- Arrive 5 minutes early\n\nTrial Details:\n- Session Fee: ₹1,000 (pay at the studio via cash or UPI)\n- Experience Level: Absolute beginners welcome\n\nYou don't need any prior experience — your instructor will guide you step-by-step. Most of our members start exactly where you are, and within a few sessions, they begin to feel stronger, more flexible, and more confident in their body.\n\n---\n\nIf you have a preferred time, just reply to this email and we'll prioritize it for you.\n\nWe're looking forward to welcoming you to the studio, ${firstName} — this could be the start of something really powerful for your body and mind.\n\nSee you soon,\nThe Vigour Team\nVigour Pilates Studio, Pune\n\nQuestions? Reply here or call us at +91 70702 11070\nvigourpilates.com`;
+  const text = `Hi ${firstName},\n\nWe just received your trial session request — and we're excited to have you experience Pilates with us.\n\nYou're booked in for ${preferredDate} at ${time} — your spot is reserved. One of our team members may still reach out via call or WhatsApp to say hi before your session.\n\nQuick note: Our trial slots are limited each day to ensure personal attention, so we'll help you lock in the best available time.\n\n---\n\nHere's how to prepare:\n- Wear comfortable, form-fitting clothes\n- Grip socks are recommended (available at the studio if needed)\n- Bring a water bottle\n- Arrive 5 minutes early\n\nTrial Details:\n- Session Fee: ₹1,000 (pay at the studio via cash or UPI)\n- Experience Level: Absolute beginners welcome\n\nYou don't need any prior experience — your instructor will guide you step-by-step. Most of our members start exactly where you are, and within a few sessions, they begin to feel stronger, more flexible, and more confident in their body.\n\n---\n\nWe're looking forward to welcoming you to the studio, ${firstName} — this could be the start of something really powerful for your body and mind.\n\nSee you soon,\nThe Vigour Team\nVigour Pilates Studio, Pune\n\nQuestions? Reply here or call us at +91 70702 11070\nvigourpilates.com`;
 
   try {
     const results = await Promise.allSettled([
