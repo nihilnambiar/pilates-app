@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 import { ArrowRight, Star, ChevronDown, Menu, X, MapPin, Clock, Users } from "lucide-react";
 import ChatBot from "../components/shared/ChatBot";
 import AnniversaryPopup from "../components/shared/AnniversaryPopup";
+import QuizNudge from "../components/shared/QuizNudge";
 import CheckoutModal from "../components/shared/CheckoutModal";
 import PilatesQuiz from "../components/shared/PilatesQuiz";
 import Iridescence from "../components/shared/Iridescence";
@@ -1848,6 +1849,9 @@ export default function LandingPage() {
 
       {/* ── Anniversary Popup ────────────────────────── */}
       <AnniversaryPopup />
+
+      {/* ── Quiz Nudge ───────────────────────────────── */}
+      <QuizNudge />
 
       {/* ── Checkout Modal ───────────────────────────── */}
       {checkoutPlan && (
