@@ -7,7 +7,11 @@ const FOREST = "#0a1e32";
 
 const ACTIVE_MS   = 10000;                    // 10s of genuinely active (tab-visible) time
 const SNOOZE_MS   = 1000 * 60 * 60 * 24 * 7;  // don't re-nag for a week after a dismissal
-const SNOOZE_KEY  = "vg_quiz_nudge_last_seen";
+// Versioned so a redesign of the nudge (copy, layout, whatever) resets
+// everyone's snooze automatically — bump this instead of asking anyone
+// to clear localStorage by hand.
+const NUDGE_VERSION = 2;
+const SNOOZE_KEY  = `vg_quiz_nudge_seen_v${NUDGE_VERSION}`;
 const RESULT_KEY  = "vigour_quiz_result";     // set by PilatesQuiz on completion
 
 // Small line-art figure, matching the mark used elsewhere on the site.
