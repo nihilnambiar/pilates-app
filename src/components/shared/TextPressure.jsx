@@ -22,8 +22,13 @@ const debounce = (func, delay) => {
 
 const TextPressure = ({
   text = 'Compressa',
-  fontFamily = 'Compressa VF',
-  fontUrl = 'https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2',
+  fontFamily = 'Roboto Flex',
+  // Self-hosted: the original Compressa demo font (Cloudinary) was permanently
+  // taken down (account disabled), so the pressure effect silently stopped
+  // rendering — the font-variation-settings had nothing to animate. Roboto
+  // Flex has both wght and wdth axes and is bundled locally to avoid relying
+  // on a third-party account again.
+  fontUrl = '/fonts/RobotoFlex-Variable.woff2',
   width = true,
   weight = true,
   italic = true,
@@ -129,7 +134,7 @@ const TextPressure = ({
     <style>{`
       @font-face {
         font-family: '${fontFamily}';
-        src: url('${fontUrl}');
+        src: url('${fontUrl}') format('woff2');
         font-style: normal;
       }
       .tp-stroke span { position: relative; color: ${textColor}; }
@@ -150,7 +155,7 @@ const TextPressure = ({
         ref={titleRef}
         className={`${className} ${flex ? 'flex justify-between' : ''} ${stroke ? 'tp-stroke' : ''} uppercase`}
         style={{
-          fontFamily,
+          fontFamily: `"${fontFamily}", sans-serif`,
           fontSize,
           lineHeight,
           transform: `scale(1, ${scaleY})`,
