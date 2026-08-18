@@ -1,14 +1,45 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, MessageCircle, ChevronDown } from "lucide-react";
-import OpenAI from "openai";
 
-// NVIDIA's NIM endpoints are OpenAI-compatible, so the OpenAI SDK talks to
-// them directly — just point baseURL at NVIDIA instead of api.openai.com.
-const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
-// Small, fast Llama 3.1 8B instruct model — cheap and low-latency (~20-50ms
-// time-to-first-token in testing), plenty for this scripted-knowledge-base bot.
-const NVIDIA_MODEL = "meta/llama-3.1-8b-instruct";
+// Chat goes through /api/chat (see api/chat.js), which proxies to NVIDIA's
+// NIM API server-side — NVIDIA doesn't send CORS headers, so the browser
+// can't call it directly, and this keeps the API key off the client too.
+async function streamChat(apiMessages, onDelta) {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: apiMessages }),
+  });
+
+  if (!res.ok || !res.body) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Connection error.");
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop(); // keep the trailing partial line for the next chunk
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) continue;
+      const payload = trimmed.slice(5).trim();
+      if (payload === "[DONE]") return;
+      try {
+        const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
+        if (delta) onDelta(delta);
+      } catch (_) {}
+    }
+  }
+}
 
 // ─── Colour tokens (matches LandingPage) ──────────────────────
 const C = {
@@ -232,11 +263,6 @@ export default function ChatBot() {
     setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
     try {
-      const apiKey = import.meta.env.VITE_NVIDIA_API_KEY;
-      if (!apiKey) throw new Error("Please add your VITE_NVIDIA_API_KEY to .env.local");
-
-      const client = new OpenAI({ apiKey, baseURL: NVIDIA_BASE_URL, dangerouslyAllowBrowser: true });
-
       // Keep only last 6 messages to minimise token usage
       const trimmedHistory = newHistory.slice(-6);
       const apiMessages = [
@@ -244,25 +270,15 @@ export default function ChatBot() {
         ...trimmedHistory.map(m => ({ role: m.role, content: m.content })),
       ];
 
-      const stream = await client.chat.completions.create({
-        model: NVIDIA_MODEL,
-        max_tokens: 450,
-        messages: apiMessages,
-        stream: true,
-      });
-
       let accumulated = "";
-      for await (const chunk of stream) {
-        const delta = chunk.choices[0]?.delta?.content || "";
-        if (delta) {
-          accumulated += delta;
-          setMessages(prev => {
-            const updated = [...prev];
-            updated[updated.length - 1] = { role: "assistant", content: accumulated };
-            return updated;
-          });
-        }
-      }
+      await streamChat(apiMessages, delta => {
+        accumulated += delta;
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: "assistant", content: accumulated };
+          return updated;
+        });
+      });
     } catch (err) {
       const errMsg = err.message || "Something went wrong. Please try again.";
       setError(errMsg);
@@ -366,35 +382,17 @@ export default function ChatBot() {
                       setIsStreaming(true);
                       setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
-                      const apiKey = import.meta.env.VITE_NVIDIA_API_KEY;
-                      if (!apiKey) {
-                        setError("Please add your VITE_NVIDIA_API_KEY to .env.local");
-                        setMessages(prev => prev.slice(0, -1));
-                        setIsStreaming(false);
-                        return;
-                      }
-                      const client = new OpenAI({ apiKey, baseURL: NVIDIA_BASE_URL, dangerouslyAllowBrowser: true });
-                      client.chat.completions.create({
-                        model: NVIDIA_MODEL,
-                        max_tokens: 300,
-                        messages: [
-                          { role: "system", content: buildSystemPrompt() },
-                          ...newHistory.slice(-6).map(m => ({ role: m.role, content: m.content })),
-                        ],
-                        stream: true,
-                      }).then(async stream => {
-                        let accumulated = "";
-                        for await (const chunk of stream) {
-                          const delta = chunk.choices[0]?.delta?.content || "";
-                          if (delta) {
-                            accumulated += delta;
-                            setMessages(prev => {
-                              const updated = [...prev];
-                              updated[updated.length - 1] = { role: "assistant", content: accumulated };
-                              return updated;
-                            });
-                          }
-                        }
+                      let accumulated = "";
+                      streamChat([
+                        { role: "system", content: buildSystemPrompt() },
+                        ...newHistory.slice(-6).map(m => ({ role: m.role, content: m.content })),
+                      ], delta => {
+                        accumulated += delta;
+                        setMessages(prev => {
+                          const updated = [...prev];
+                          updated[updated.length - 1] = { role: "assistant", content: accumulated };
+                          return updated;
+                        });
                       }).catch(err => {
                         setError(err.message);
                         setMessages(prev => prev.slice(0, -1));
