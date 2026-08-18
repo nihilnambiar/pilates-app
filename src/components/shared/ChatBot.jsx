@@ -1,7 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, MessageCircle, ChevronDown } from "lucide-react";
-import Groq from "groq-sdk";
+import OpenAI from "openai";
+
+// NVIDIA's NIM endpoints are OpenAI-compatible, so the OpenAI SDK talks to
+// them directly — just point baseURL at NVIDIA instead of api.openai.com.
+const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
+// Small, fast Llama 3.1 8B instruct model — cheap and low-latency (~20-50ms
+// time-to-first-token in testing), plenty for this scripted-knowledge-base bot.
+const NVIDIA_MODEL = "meta/llama-3.1-8b-instruct";
 
 // ─── Colour tokens (matches LandingPage) ──────────────────────
 const C = {
@@ -225,10 +232,10 @@ export default function ChatBot() {
     setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
     try {
-      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-      if (!apiKey) throw new Error("Please add your VITE_GROQ_API_KEY to .env.local");
+      const apiKey = import.meta.env.VITE_NVIDIA_API_KEY;
+      if (!apiKey) throw new Error("Please add your VITE_NVIDIA_API_KEY to .env.local");
 
-      const client = new Groq({ apiKey, dangerouslyAllowBrowser: true });
+      const client = new OpenAI({ apiKey, baseURL: NVIDIA_BASE_URL, dangerouslyAllowBrowser: true });
 
       // Keep only last 6 messages to minimise token usage
       const trimmedHistory = newHistory.slice(-6);
@@ -238,7 +245,7 @@ export default function ChatBot() {
       ];
 
       const stream = await client.chat.completions.create({
-        model: "llama-3.1-8b-instant",
+        model: NVIDIA_MODEL,
         max_tokens: 450,
         messages: apiMessages,
         stream: true,
@@ -359,16 +366,16 @@ export default function ChatBot() {
                       setIsStreaming(true);
                       setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
-                      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+                      const apiKey = import.meta.env.VITE_NVIDIA_API_KEY;
                       if (!apiKey) {
-                        setError("Please add your VITE_GROQ_API_KEY to .env.local");
+                        setError("Please add your VITE_NVIDIA_API_KEY to .env.local");
                         setMessages(prev => prev.slice(0, -1));
                         setIsStreaming(false);
                         return;
                       }
-                      const client = new Groq({ apiKey, dangerouslyAllowBrowser: true });
+                      const client = new OpenAI({ apiKey, baseURL: NVIDIA_BASE_URL, dangerouslyAllowBrowser: true });
                       client.chat.completions.create({
-                        model: "llama-3.1-8b-instant",
+                        model: NVIDIA_MODEL,
                         max_tokens: 300,
                         messages: [
                           { role: "system", content: buildSystemPrompt() },
