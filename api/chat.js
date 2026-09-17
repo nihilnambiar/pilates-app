@@ -2,7 +2,7 @@
 // integrate.api.nvidia.com doesn't send CORS headers, so the browser can't
 // call it directly (unlike Groq, which the frontend used to hit directly).
 // As a bonus, the API key now never reaches the client bundle.
-const NVIDIA_MODEL = 'meta/llama-3.1-8b-instruct';
+const NVIDIA_MODEL = 'meta/llama-3.2-11b-vision-instruct';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
