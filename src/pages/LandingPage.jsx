@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionValueEvent } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, lazy, Suspense } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
@@ -8,8 +8,11 @@ import { ArrowRight, Star, ChevronDown, Menu, X, MapPin, Clock, Users } from "lu
 import ChatBot from "../components/shared/ChatBot";
 import AnniversaryPopup from "../components/shared/AnniversaryPopup";
 import QuizNudge from "../components/shared/QuizNudge";
-import CheckoutModal from "../components/shared/CheckoutModal";
-import PilatesQuiz from "../components/shared/PilatesQuiz";
+// Deferred out of the main landing-page bundle: the quiz pulls in recharts +
+// the Anthropic SDK, and checkout pulls in the Razorpay flow — neither is
+// needed for first paint, so they load on their own as separate chunks.
+const CheckoutModal = lazy(() => import("../components/shared/CheckoutModal"));
+const PilatesQuiz    = lazy(() => import("../components/shared/PilatesQuiz"));
 import Iridescence from "../components/shared/Iridescence";
 import TextPressure from "../components/shared/TextPressure";
 import BorderGlow from "../components/shared/BorderGlow";
@@ -839,25 +842,25 @@ function GallerySection({ galleryItems, C }) {
               }}
             >
               {item.type === "video" ? (
-                <video src={item.src} autoPlay muted loop playsInline style={{
+                <video src={item.src} autoPlay muted loop playsInline preload="metadata" style={{
                   position:"absolute", inset:"-10%", width:"120%", height:"120%",
                   objectFit:"cover", filter:"blur(22px) brightness(0.32) saturate(1.3)",
                   transform:"scale(1.05)", pointerEvents:"none",
                 }}/>
               ) : (
-                <img src={item.src} alt="" style={{
+                <img src={item.src} alt="" loading="lazy" style={{
                   position:"absolute", inset:"-10%", width:"120%", height:"120%",
                   objectFit:"cover", filter:"blur(22px) brightness(0.32) saturate(1.3)",
                   transform:"scale(1.05)", pointerEvents:"none",
                 }}/>
               )}
               {item.type === "video" ? (
-                <video src={item.src} autoPlay muted loop playsInline style={{
+                <video src={item.src} autoPlay muted loop playsInline preload="metadata" style={{
                   position:"absolute", inset:0, width:"100%", height:"100%",
                   objectFit:"contain", objectPosition:"center",
                 }}/>
               ) : (
-                <img src={item.src} alt={item.caption} style={{
+                <img src={item.src} alt={item.caption} loading="lazy" style={{
                   position:"absolute", inset:0, width:"100%", height:"100%",
                   objectFit:"contain", objectPosition:"center",
                 }}/>
@@ -1300,7 +1303,7 @@ export default function LandingPage() {
                 <div className="relative mb-5 overflow-hidden rounded-3xl"
                   style={{aspectRatio:"3/4", background:`linear-gradient(160deg, #181818 0%, #0a0a0a 100%)`,
                     border:`1px solid rgba(30,128,194,0.1)`}}>
-                  <img src={inst.photo} alt={inst.name}
+                  <img src={inst.photo} alt={inst.name} loading="lazy"
                     style={{width:"100%", height:"100%", objectFit:"cover", objectPosition:"center top",
                       opacity:0.85, transition:"transform 0.5s ease, opacity 0.3s"}}
                     onMouseEnter={e=>{e.target.style.transform="scale(1.04)"; e.target.style.opacity="1";}}
@@ -1427,8 +1430,8 @@ export default function LandingPage() {
                   vid.pause(); vid.currentTime = 0;
                 }}>
 
-                {/* Video */}
-                <video src={v.src} muted loop playsInline
+                {/* Video — hover-to-play, so no need to fetch anything upfront */}
+                <video src={v.src} muted loop playsInline preload="none"
                   style={{width:"100%",height:"100%",objectFit:"cover",display:"block",
                     transition:"opacity 0.4s ease"}}/>
 
@@ -1576,7 +1579,24 @@ export default function LandingPage() {
       </section>
 
       {/* ── QUIZ ─────────────────────────────────── */}
-      <PilatesQuiz />
+      {/* id="quiz" lives on the fallback too — several nav/CTA links point at
+          href="#quiz", and they need a valid scroll target even before the
+          lazy PilatesQuiz chunk has finished loading. */}
+      <Suspense fallback={
+        <div id="quiz" style={{
+          background: `linear-gradient(160deg, ${C.forest} 0%, #0d1f10 40%, ${C.black} 100%)`,
+          minHeight: "600px", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: "50%",
+            border: "2px solid rgba(255,255,255,0.15)", borderTopColor: C.gold,
+            animation: "quizSpin 0.8s linear infinite",
+          }}/>
+          <style>{`@keyframes quizSpin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      }>
+        <PilatesQuiz />
+      </Suspense>
 
       {/* ── FAQ ──────────────────────────────────── */}
       <section id="faq" className="py-28 px-6" style={{background:"#0d0d0d"}}>
@@ -1855,7 +1875,9 @@ export default function LandingPage() {
 
       {/* ── Checkout Modal ───────────────────────────── */}
       {checkoutPlan && (
-        <CheckoutModal plan={checkoutPlan} onClose={() => setCheckoutPlan(null)} />
+        <Suspense fallback={null}>
+          <CheckoutModal plan={checkoutPlan} onClose={() => setCheckoutPlan(null)} />
+        </Suspense>
       )}
     </div>
   );

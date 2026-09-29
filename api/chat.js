@@ -2,6 +2,13 @@
 // integrate.api.nvidia.com doesn't send CORS headers, so the browser can't
 // call it directly (unlike Groq, which the frontend used to hit directly).
 // As a bonus, the API key now never reaches the client bundle.
+//
+// Model: the small, fast meta/llama-3.1-8b-instruct this used to run on was
+// deprecated by NVIDIA (Aug 2026) and is gone (410). Of the alternatives,
+// only the vision-instruct Llama models are actually enabled on this NVIDIA
+// account — everything smaller/faster (Mistral, Gemma, Granite, etc.)
+// 404s as "not found for account," meaning it'd need to be subscribed on
+// NVIDIA's dashboard first. 11B is the smallest working option right now.
 const NVIDIA_MODEL = 'meta/llama-3.2-11b-vision-instruct';
 
 export default async function handler(req, res) {
@@ -24,7 +31,10 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: NVIDIA_MODEL,
-        max_tokens: 450,
+        // Lower cap so replies finish sooner — this model runs ~100ms/token
+        // on this account's tier, so trimming the ceiling directly cuts
+        // worst-case latency. Chat answers are meant to stay focused anyway.
+        max_tokens: 250,
         messages,
         stream: true,
       }),

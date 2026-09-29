@@ -61,16 +61,6 @@ const QUESTIONS = [
   },
   {
     id: 5,
-    q: "How many sessions per week can you commit to?",
-    options: [
-      { label: "1 session — testing the waters", tags: ["barrel","restore"] },
-      { label: "2 sessions — building a routine", tags: ["barrel","cadillac"] },
-      { label: "3 sessions — serious commitment", tags: ["reformer","cadillac"] },
-      { label: "4+ sessions — fully dedicated", tags: ["chair","reformer"] },
-    ],
-  },
-  {
-    id: 6,
     q: "How do you like your workouts to feel?",
     options: [
       { label: "Slow, intentional, almost meditative", tags: ["restore","barrel"] },
@@ -80,7 +70,7 @@ const QUESTIONS = [
     ],
   },
   {
-    id: 7,
+    id: 6,
     q: "What matters most to you in a class?",
     options: [
       { label: "Mental calm and stress relief", tags: ["restore","barrel"] },
@@ -90,27 +80,7 @@ const QUESTIONS = [
     ],
   },
   {
-    id: 8,
-    q: "How does your body feel right now?",
-    options: [
-      { label: "Stiff and tight — needs to loosen up", tags: ["restore","cadillac"] },
-      { label: "Generally okay, could be better", tags: ["barrel","reformer"] },
-      { label: "Energized and ready to work hard", tags: ["chair","reformer"] },
-      { label: "Sore or recovering from strain", tags: ["restore","cadillac"] },
-    ],
-  },
-  {
-    id: 9,
-    q: "What's your age range?",
-    options: [
-      { label: "Under 25", tags: ["chair","cadillac"] },
-      { label: "25 – 35", tags: ["reformer","cadillac"] },
-      { label: "36 – 50", tags: ["barrel","reformer"] },
-      { label: "50+", tags: ["restore","barrel"] },
-    ],
-  },
-  {
-    id: 10,
+    id: 7,
     q: "Pick the statement that resonates most:",
     options: [
       { label: "I want a stronger, flatter core", tags: ["chair","barrel"] },
@@ -120,7 +90,7 @@ const QUESTIONS = [
     ],
   },
   {
-    id: 11,
+    id: 8,
     q: "Do you have a background in any of these?",
     options: [
       { label: "Yoga or meditation", tags: ["restore","barrel"] },
@@ -130,7 +100,7 @@ const QUESTIONS = [
     ],
   },
   {
-    id: 12,
+    id: 9,
     q: "When you hit a hard exercise, you:",
     options: [
       { label: "Ease back and honour your limits", tags: ["restore","cadillac"] },
@@ -140,33 +110,13 @@ const QUESTIONS = [
     ],
   },
   {
-    id: 13,
-    q: "Biggest obstacle to staying consistent?",
-    options: [
-      { label: "Not enough time", tags: ["barrel","cadillac"] },
-      { label: "Lack of motivation or accountability", tags: ["reformer","cadillac"] },
-      { label: "Physical pain or old injuries", tags: ["restore","barrel"] },
-      { label: "Haven't found the right method yet", tags: ["reformer","chair"] },
-    ],
-  },
-  {
-    id: 14,
+    id: 10,
     q: "After a perfect session, you feel:",
     options: [
       { label: "Zen, stretched, and completely calm", tags: ["restore","barrel"] },
       { label: "Strong, sculpted, and accomplished", tags: ["chair","reformer"] },
       { label: "Graceful and long in your limbs", tags: ["cadillac","barrel"] },
       { label: "Like your body genuinely needed that", tags: ["restore","reformer"] },
-    ],
-  },
-  {
-    id: 15,
-    q: "What would make this studio feel like home?",
-    options: [
-      { label: "Small classes where I'm truly seen", tags: ["barrel","restore"] },
-      { label: "Results I can measure and track", tags: ["chair","reformer"] },
-      { label: "Beautiful, calming atmosphere", tags: ["cadillac","restore"] },
-      { label: "Instructors who understand my body", tags: ["restore","reformer"] },
     ],
   },
 ];
@@ -435,8 +385,8 @@ function ResultsView({ topClass, analysis, radarData, onSendEmail }) {
 
 // ── Main export ───────────────────────────────────────────────
 export default function PilatesQuiz() {
-  const [current,   setCurrent]   = useState(0);           // 0-14 = questions, 15 = analyzing, 16 = results
-  const [answers,   setAnswers]   = useState(Array(15).fill(null));
+  const [current,   setCurrent]   = useState(0);           // question index; "phase" tracks analyzing/results separately
+  const [answers,   setAnswers]   = useState(Array(10).fill(null));
   const [analysis,  setAnalysis]  = useState("");
   const [topClass,  setTopClass]  = useState("reformer");
   const [radarData, setRadarData] = useState([]);
@@ -494,7 +444,7 @@ export default function PilatesQuiz() {
 
   const restart = () => {
     setCurrent(0);
-    setAnswers(Array(15).fill(null));
+    setAnswers(Array(10).fill(null));
     setAnalysis("");
     setPhase("quiz");
     setError("");
@@ -529,7 +479,7 @@ export default function PilatesQuiz() {
             Find your<br /><em style={{ fontStyle: "italic", color: C.gold }}>perfect class</em>
           </h2>
           <p className="font-body text-sm mt-4" style={{ color: "rgba(255,255,255,0.4)" }}>
-            15 questions · 3 minutes · AI-powered analysis sent to your inbox
+            10 questions · 2 minutes · AI-powered analysis sent to your inbox
           </p>
           <p className="font-body text-xs mt-2" style={{color:"rgba(157,194,48,0.6)"}}>
             ✓ Taken by 200+ Vigour members · Results include personalised class recommendation + 30-day plan
