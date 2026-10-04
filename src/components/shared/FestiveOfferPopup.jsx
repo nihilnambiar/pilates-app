@@ -15,10 +15,10 @@ const SNOOZE_KEY = `vg_festive_popup_seen_v${POPUP_VERSION}`;
 const OFFER_END = new Date("2026-11-08T23:59:59");
 
 const TIERS = [
-  { price: "10,000", sessions: 12, bonusLabel: "FREE SESSION",   bonus: "+1" },
-  { price: "15,000", sessions: 20, bonusLabel: "FOR A FRIEND",   bonus: "+1" },
-  { price: "20,000", sessions: 27, bonusLabel: "FOR FRIENDS",    bonus: "+2", highlight: true },
-  { price: "30,000", sessions: 38, bonusLabel: "FOR FRIENDS",    bonus: "+3" },
+  { price: "10,000", sessions: 12, bonusLabel: "FREE SESSION",     bonus: "+1" },
+  { price: "15,000", sessions: 20, bonusLabel: "FOR A FRIEND",     bonus: "+1" },
+  { price: "20,000", sessions: 27, bonusLabel: "FOR YOUR FRIEND",  bonus: "+2", highlight: true },
+  { price: "30,000", sessions: 38, bonusLabel: "FOR YOUR FRIEND",  bonus: "+3" },
 ];
 
 function getDaysLeft() {

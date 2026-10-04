@@ -660,13 +660,13 @@ const festivePlans = [
     features:["All apparatus","Guided by trainer","Bring 1 friend or family member free"],
     bonusTag:"+1", bonusLabel:"For a Friend" },
   { name:"Festive Trio", isFestive:true,
-    price:"₹20,000", sub:"27 sessions + 2 for friends", perClass:"Festive package · valid till Diwali", amount:20000,
-    features:["All apparatus","Guided by trainer","Bring 2 friends or family free"],
-    bonusTag:"+2", bonusLabel:"For Friends", highlight:true },
+    price:"₹20,000", sub:"27 sessions + 2 for your friend", perClass:"Festive package · valid till Diwali", amount:20000,
+    features:["All apparatus","Guided by trainer","Bring 1 friend or family member — they get 2 free sessions"],
+    bonusTag:"+2", bonusLabel:"For Your Friend", highlight:true },
   { name:"Festive Circle", isFestive:true,
-    price:"₹30,000", sub:"38 sessions + 3 for friends", perClass:"Festive package · valid till Diwali", amount:30000,
-    features:["All apparatus","Guided by trainer","Bring 3 friends or family free","Priority booking this season"],
-    bonusTag:"+3", bonusLabel:"For Friends" },
+    price:"₹30,000", sub:"38 sessions + 3 for your friend", perClass:"Festive package · valid till Diwali", amount:30000,
+    features:["All apparatus","Guided by trainer","Bring 1 friend or family member — they get 3 free sessions","Priority booking this season"],
+    bonusTag:"+3", bonusLabel:"For Your Friend" },
 ];
 
 const faqs = [
@@ -1539,7 +1539,7 @@ export default function LandingPage() {
                   {p.highlight && (
                     <div className="absolute -top-3.5 left-0 right-0 flex justify-center z-10">
                       <span className="text-xs font-body font-semibold px-4 py-1.5 rounded-full"
-                        style={{background:C.amber, color:"#1a1308"}}>Best for Groups</span>
+                        style={{background:C.amber, color:"#1a1308"}}>Most Popular</span>
                     </div>
                   )}
 
