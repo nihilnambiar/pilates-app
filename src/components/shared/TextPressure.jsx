@@ -111,17 +111,27 @@ const TextPressure = ({
       if (titleRef.current) {
         const titleRect = titleRef.current.getBoundingClientRect();
         const maxDist   = titleRect.width / 2;
-        spansRef.current.forEach(span => {
-          if (!span) return;
+
+        // Batch all geometry reads first, then all style writes. Reading
+        // getBoundingClientRect right after writing a style (the original
+        // interleaved loop) forces the browser to synchronously recompute
+        // layout on every iteration — up to ~20x per frame, 60 times a
+        // second. Separating reads from writes lets layout settle once.
+        const updates = spansRef.current.map(span => {
+          if (!span) return null;
           const rect = span.getBoundingClientRect();
-          const d    = dist(mouseRef.current, { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 });
-          const wdth    = width  ? Math.floor(getAttr(d, maxDist, 5, 200))           : 100;
-          const wght    = weight ? Math.floor(getAttr(d, maxDist, 100, 900))         : 400;
-          const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2)              : 0;
-          const alphaVal= alpha  ? getAttr(d, maxDist, 0, 1).toFixed(2)              : 1;
-          const fvs = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
-          if (span.style.fontVariationSettings !== fvs) span.style.fontVariationSettings = fvs;
-          if (alpha && span.style.opacity !== alphaVal) span.style.opacity = alphaVal;
+          const d = dist(mouseRef.current, { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 });
+          const wdth    = width  ? Math.floor(getAttr(d, maxDist, 5, 200))   : 100;
+          const wght    = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
+          const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2)      : 0;
+          const alphaVal= alpha  ? getAttr(d, maxDist, 0, 1).toFixed(2)      : 1;
+          return { span, fvs: `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`, alphaVal };
+        });
+
+        updates.forEach(u => {
+          if (!u) return;
+          if (u.span.style.fontVariationSettings !== u.fvs) u.span.style.fontVariationSettings = u.fvs;
+          if (alpha && u.span.style.opacity !== u.alphaVal) u.span.style.opacity = u.alphaVal;
         });
       }
       rafId = requestAnimationFrame(animate);

@@ -37,6 +37,34 @@ const C = {
   amber:   "#c9a46a", // warm festive accent — same tone as the Elite plan card
 };
 
+// ─── Lazy Iridescence ─────────────────────────────────────────
+// Each <Iridescence> creates its own WebGL context and compiles its own
+// shader program — genuinely expensive (often 1s+ of main-thread blocking
+// during initial load). The page uses it 3 times; only the hero's needs to
+// be eager, since it's the only one visible on first paint. These two defer
+// WebGL setup until the section actually scrolls into view.
+function LazyIridescence(props) {
+  const ref = useRef(null);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current || shouldRender) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldRender(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px" } // start mounting slightly before it's on screen, so there's no visible pop-in
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [shouldRender]);
+
+  return <div ref={ref} className="w-full h-full">{shouldRender && <Iridescence {...props} />}</div>;
+}
+
 // ─── Reformer SVG (fully animated) ───────────────────────────
 function ReformerSVG({ progress }) {
   const carriageX  = useTransform(progress, [0,0.3,0.6,1], [0, 55, -38, 18]);
@@ -1298,7 +1326,7 @@ export default function LandingPage() {
       {/* ── INSTRUCTORS ──────────────────────────── */}
       <section style={{background:C.black, padding:"100px 24px", position:"relative", overflow:"hidden"}}>
         <div className="absolute inset-0" style={{pointerEvents:"none"}}>
-          <Iridescence color={[0.12, 0.32, 0.56]} mouseReact amplitude={0.12} speed={0.8} />
+          <LazyIridescence color={[0.12, 0.32, 0.56]} mouseReact amplitude={0.12} speed={0.8} />
         </div>
         <div className="absolute inset-0 pointer-events-none" style={{background:"rgba(0,0,0,0.55)"}}/>
         <div className="max-w-7xl mx-auto" style={{position:"relative"}}>
@@ -1741,7 +1769,7 @@ export default function LandingPage() {
       <section id="trial" className="py-28 px-6"
         style={{background:"#0d0d0d", position:"relative", overflow:"hidden"}}>
         <div className="absolute inset-0" style={{pointerEvents:"none"}}>
-          <Iridescence color={[0.12, 0.32, 0.56]} mouseReact amplitude={0.12} speed={0.8} />
+          <LazyIridescence color={[0.12, 0.32, 0.56]} mouseReact amplitude={0.12} speed={0.8} />
         </div>
         <div className="absolute inset-0 pointer-events-none" style={{background:"rgba(0,0,0,0.6)"}}/>
         <div className="max-w-2xl mx-auto" style={{position:"relative"}}>
