@@ -18,10 +18,12 @@ const ACCENT = {
   highlight: { bg: "linear-gradient(135deg,#0a1e32 0%,#1E80C2 100%)", ring: "#1E80C2", btn: "#1E80C2", btnText: "#0d0d0d" },
   elite:     { bg: "linear-gradient(135deg,#0e0c08 0%,#2a1e08 100%)", ring: "#c9a46a", btn: "#c9a46a", btnText: "#0d0d0d" },
   group:     { bg: "linear-gradient(135deg,#0a1e32 0%,#1E80C2 100%)", ring: "#1E80C2", btn: "#1E80C2", btnText: "#0d0d0d" },
+  festive:   { bg: "linear-gradient(135deg,#1a1308 0%,#2a1e08 100%)", ring: "#c9a46a", btn: "#c9a46a", btnText: "#1a1308" },
   default:   { bg: "linear-gradient(135deg,#0a1e32 0%,#1a2d40 100%)", ring: "#1E80C2", btn: "#fff",    btnText: "#0d0d0d" },
 };
 
 function getAccent(plan) {
+  if (plan.isFestive)   return ACCENT.festive;
   if (plan.isElite)     return ACCENT.elite;
   if (plan.highlight)   return ACCENT.highlight;
   if (plan.isGroup)     return ACCENT.group;
@@ -162,16 +164,16 @@ export default function CheckoutModal({ plan, onClose }) {
             <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 0 2px", letterSpacing: "-0.3px" }}>
               {plan.name}
             </h2>
-            <p style={{ color: plan.isElite ? "rgba(201,164,106,0.7)" : "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 16 }}>
+            <p style={{ color: (plan.isElite || plan.isFestive) ? "rgba(201,164,106,0.7)" : "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 16 }}>
               {plan.sub}
             </p>
 
             {/* Price row */}
             <div className="flex items-baseline justify-between">
-              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 700, color: plan.isElite ? "#c9a46a" : "#fff" }}>
+              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 700, color: (plan.isElite || plan.isFestive) ? "#c9a46a" : "#fff" }}>
                 {plan.price}
               </span>
-              <span style={{ fontSize: 12, color: plan.isElite ? "rgba(201,164,106,0.55)" : "rgba(255,255,255,0.4)", textAlign: "right" }}>
+              <span style={{ fontSize: 12, color: (plan.isElite || plan.isFestive) ? "rgba(201,164,106,0.55)" : "rgba(255,255,255,0.4)", textAlign: "right" }}>
                 {plan.perClass}
               </span>
             </div>
@@ -180,7 +182,7 @@ export default function CheckoutModal({ plan, onClose }) {
             <div className="mt-4 space-y-1.5">
               {plan.features.map(f => (
                 <div key={f} className="flex items-center gap-2">
-                  <span style={{ color: plan.isElite ? "#c9a46a" : "#9DC230", fontSize: 10, flexShrink: 0 }}>—</span>
+                  <span style={{ color: (plan.isElite || plan.isFestive) ? "#c9a46a" : "#9DC230", fontSize: 10, flexShrink: 0 }}>—</span>
                   <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>{f}</span>
                 </div>
               ))}

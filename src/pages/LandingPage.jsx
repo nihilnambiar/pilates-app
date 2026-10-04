@@ -6,7 +6,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 import { ArrowRight, Star, ChevronDown, Menu, X, MapPin, Clock, Users } from "lucide-react";
 import ChatBot from "../components/shared/ChatBot";
-import AnniversaryPopup from "../components/shared/AnniversaryPopup";
+import FestiveOfferPopup from "../components/shared/FestiveOfferPopup";
 import QuizNudge from "../components/shared/QuizNudge";
 // Deferred out of the main landing-page bundle: the quiz pulls in recharts +
 // the Anthropic SDK, and checkout pulls in the Razorpay flow — neither is
@@ -34,6 +34,7 @@ const C = {
   white:   "#ffffff",
   muted:   "#6b7a8d",
   border:  "rgba(26,61,107,0.15)",
+  amber:   "#c9a46a", // warm festive accent — same tone as the Elite plan card
 };
 
 // ─── Reformer SVG (fully animated) ───────────────────────────
@@ -646,6 +647,26 @@ const plans = [
     price:"₹599",    sub:"per person · max 8", perClass:"Weekend group session", amount:599,
     features:["Exclusive studio access","Up to 8 people","Dedicated instructor","Perfect for families & friends","Weekend slots only"],
     highlight:false, badge:"Weekend Special", isGroup:true },
+];
+
+// ─── Festive Season Offer — limited-time packages, valid till Diwali (8 Nov) ──
+const festivePlans = [
+  { name:"Festive Solo", isFestive:true,
+    price:"₹10,000", sub:"12 sessions + 1 free session", perClass:"Festive package · valid till Diwali", amount:10000,
+    features:["All apparatus","Guided by trainer","1 bonus session on us"],
+    bonusTag:"+1", bonusLabel:"Free Session" },
+  { name:"Festive Duo", isFestive:true,
+    price:"₹15,000", sub:"20 sessions + 1 for a friend", perClass:"Festive package · valid till Diwali", amount:15000,
+    features:["All apparatus","Guided by trainer","Bring 1 friend or family member free"],
+    bonusTag:"+1", bonusLabel:"For a Friend" },
+  { name:"Festive Trio", isFestive:true,
+    price:"₹20,000", sub:"27 sessions + 2 for friends", perClass:"Festive package · valid till Diwali", amount:20000,
+    features:["All apparatus","Guided by trainer","Bring 2 friends or family free"],
+    bonusTag:"+2", bonusLabel:"For Friends", highlight:true },
+  { name:"Festive Circle", isFestive:true,
+    price:"₹30,000", sub:"38 sessions + 3 for friends", perClass:"Festive package · valid till Diwali", amount:30000,
+    features:["All apparatus","Guided by trainer","Bring 3 friends or family free","Priority booking this season"],
+    bonusTag:"+3", bonusLabel:"For Friends" },
 ];
 
 const faqs = [
@@ -1486,6 +1507,89 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
+          {/* ── Festive Season Offer ──────────────────── */}
+          <motion.div id="festive-offer" initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}}
+            viewport={{once:true}} className="mb-20 pb-16 border-b" style={{borderColor:"rgba(201,164,106,0.15)"}}>
+
+            <div className="flex items-center gap-2 mb-4">
+              <span style={{color:C.amber, fontSize:13}}>✦</span>
+              <p className="font-body text-sm tracking-widest uppercase" style={{color:C.amber}}>Festive Season Offer</p>
+              <span style={{color:C.amber, fontSize:13}}>✦</span>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+              <h3 className="font-display text-3xl md:text-4xl font-semibold" style={{color:C.white}}>
+                Move together <em style={{fontStyle:"italic", color:C.amber}}>this festive season</em>
+              </h3>
+              <div className="flex-shrink-0" style={{
+                display:"inline-flex", alignItems:"center", gap:7,
+                background:"rgba(201,164,106,0.1)", border:"1px solid rgba(201,164,106,0.3)",
+                borderRadius:999, padding:"7px 16px",
+              }}>
+                <span style={{display:"inline-block", width:7, height:7, borderRadius:"50%", background:C.amber, boxShadow:`0 0 6px ${C.amber}`}}/>
+                <span className="font-body text-xs font-semibold" style={{color:C.amber}}>Valid till Diwali · 8 Nov</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {festivePlans.map((p,i)=>(
+                <motion.div key={p.name} initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}}
+                  viewport={{once:true}} transition={{delay:i*0.08}} className="relative flex flex-col">
+
+                  {p.highlight && (
+                    <div className="absolute -top-3.5 left-0 right-0 flex justify-center z-10">
+                      <span className="text-xs font-body font-semibold px-4 py-1.5 rounded-full"
+                        style={{background:C.amber, color:"#1a1308"}}>Best for Groups</span>
+                    </div>
+                  )}
+
+                  <BorderGlow
+                    backgroundColor={p.highlight ? "#1a1308" : "#141008"}
+                    borderRadius={24}
+                    glowColor="190 155 90"
+                    colors={['#c9a46a','#e8c98a','#a07840']}
+                    glowRadius={p.highlight ? 50 : 42}
+                    glowIntensity={p.highlight ? 1.2 : 0.8}
+                    edgeSensitivity={25}
+                    coneSpread={30}
+                    fillOpacity={0.35}
+                    className="w-full flex-1">
+                    <div className="p-6 flex flex-col h-full">
+                      <h4 className="font-display text-lg font-semibold mb-1" style={{color:"#fff"}}>{p.name}</h4>
+                      <p className="font-body text-xs mb-4" style={{color:"rgba(201,164,106,0.55)"}}>{p.perClass}</p>
+
+                      <div className="flex items-baseline gap-1 mb-2 pb-4 border-b" style={{borderColor:"rgba(201,164,106,0.15)"}}>
+                        <span className="font-display text-2xl font-semibold" style={{color:"#fff"}}>{p.price}</span>
+                      </div>
+                      <p className="font-body text-xs mb-4" style={{color:"rgba(255,255,255,0.4)"}}>{p.sub}</p>
+
+                      <div className="inline-flex items-baseline gap-1.5 rounded-full mb-5 self-start"
+                        style={{background:"rgba(201,164,106,0.15)", padding:"4px 11px"}}>
+                        <span className="font-body text-xs font-extrabold" style={{color:C.amber}}>{p.bonusTag}</span>
+                        <span className="font-body" style={{fontSize:10, fontWeight:700, letterSpacing:"0.03em", color:C.amber, opacity:0.85}}>{p.bonusLabel}</span>
+                      </div>
+
+                      <ul className="space-y-2.5 mb-6 flex-1">
+                        {p.features.map(f=>(
+                          <li key={f} className="flex items-center gap-2.5 font-body text-xs" style={{color:"rgba(255,255,255,0.65)"}}>
+                            <span style={{color:C.amber, flexShrink:0, fontSize:10}}>—</span>
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <button onClick={()=>setCheckoutPlan(p)}
+                        className="block w-full text-center py-3 rounded-2xl font-body font-semibold text-sm transition-all duration-300 mt-auto cursor-pointer"
+                        style={{background:`linear-gradient(135deg, ${C.amber} 0%, #e8c98a 100%)`, color:"#1a1308"}}>
+                        Claim This Offer
+                      </button>
+                    </div>
+                  </BorderGlow>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {plans.map((p,i)=>(
               <motion.div key={p.name} initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}}
@@ -1867,8 +1971,8 @@ export default function LandingPage() {
       {/* ── Chatbot ──────────────────────────────────── */}
       <ChatBot />
 
-      {/* ── Anniversary Popup ────────────────────────── */}
-      <AnniversaryPopup />
+      {/* ── Festive Offer Popup ──────────────────────── */}
+      <FestiveOfferPopup />
 
       {/* ── Quiz Nudge ───────────────────────────────── */}
       <QuizNudge />

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
+import { claimPopupSlot, releasePopupSlot } from "./popupGate";
 
 const GOLD   = "#1E80C2";
 const FOREST = "#0a1e32";
@@ -53,10 +54,15 @@ export default function QuizNudge() {
         const quizEl = document.getElementById("quiz");
         const rect = quizEl?.getBoundingClientRect();
         const quizInView = rect && rect.top < window.innerHeight && rect.bottom > 0;
-        if (!quizInView) {
-          shownRef.current = true;
-          setVisible(true);
+        // Also don't stack on top of another popup (e.g. the festive offer)
+        // that currently has the floor — keep checking until it's free.
+        if (quizInView) return;
+        if (!claimPopupSlot()) {
+          timer = setTimeout(tick, 400);
+          return;
         }
+        shownRef.current = true;
+        setVisible(true);
         return;
       }
       timer = setTimeout(tick, 400);
@@ -71,11 +77,13 @@ export default function QuizNudge() {
 
   const dismiss = () => {
     setVisible(false);
+    releasePopupSlot();
     remember();
   };
 
   const takeQuiz = () => {
     setVisible(false);
+    releasePopupSlot();
     remember();
     document.getElementById("quiz")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
