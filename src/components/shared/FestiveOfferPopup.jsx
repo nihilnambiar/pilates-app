@@ -5,12 +5,14 @@ import { claimPopupSlot, releasePopupSlot } from "./popupGate";
 
 const AMBER = "#c9a46a"; // warm festive accent — same tone used for the Elite tier elsewhere
 
-const ACTIVE_MS = 3000;                      // 3s of genuinely active (tab-visible) time
+const SHOW_AFTER_MS = 3000;                  // true 3 real seconds after the page opens — not "3s of foreground time"
 const SNOOZE_MS = 1000 * 60 * 60 * 24 * 3;   // short snooze — this is a time-limited promo, not an evergreen nudge
-// Bumped because the popup now shows the actual ad creative instead of a
-// hand-built card — anyone who already dismissed the old version should
-// still get a chance to see this one.
-const POPUP_VERSION = 2;
+// Bumped again: the trigger used to pause while the tab was backgrounded
+// (e.g. someone briefly switching tabs while the page loaded), so it could
+// take much longer than 3s to actually appear. Now it's a straight timer —
+// anyone who dismissed under the old, slower-to-appear behavior should get
+// a fresh shot at this version.
+const POPUP_VERSION = 3;
 const SNOOZE_KEY = `vg_festive_popup_seen_v${POPUP_VERSION}`;
 
 const OFFER_END = new Date("2026-11-08T23:59:59");
@@ -30,31 +32,21 @@ export default function FestiveOfferPopup() {
     const preload = new Image();
     preload.src = "/festive-ad.jpg";
 
-    let activeMs = 0;
-    let last = Date.now();
-    let timer;
+    // Fires at a true 3 seconds of real elapsed time, full stop — no
+    // pausing for a backgrounded tab, scrolling, clicking, or anything else
+    // happening on the page. If the quiz nudge's own (10s, much later)
+    // trigger happened to be mid-animation right at this instant, wait a
+    // brief beat for it to clear rather than silently skipping.
+    let retryTimer;
+    const showTimer = setTimeout(() => {
+      const tryShow = () => {
+        if (claimPopupSlot()) { setVisible(true); return; }
+        retryTimer = setTimeout(tryShow, 200);
+      };
+      tryShow();
+    }, SHOW_AFTER_MS);
 
-    // Counts only time the tab is actually visible, matching the pattern used
-    // for the quiz nudge — a backgrounded tab shouldn't silently rack up 3s.
-    const tick = () => {
-      const now = Date.now();
-      if (!document.hidden) activeMs += now - last;
-      last = now;
-
-      if (activeMs >= ACTIVE_MS) {
-        // Another popup (e.g. the quiz nudge) already has the floor — don't
-        // stack on top of it, just keep checking until it's free.
-        if (!claimPopupSlot()) {
-          timer = setTimeout(tick, 300);
-          return;
-        }
-        setVisible(true);
-        return;
-      }
-      timer = setTimeout(tick, 300);
-    };
-    timer = setTimeout(tick, 300);
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(showTimer); clearTimeout(retryTimer); };
   }, []);
 
   const remember = () => {
